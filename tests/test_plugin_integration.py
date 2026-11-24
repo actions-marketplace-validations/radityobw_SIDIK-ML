@@ -153,7 +153,8 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             with open(out_html, "r", encoding="utf-8") as fh:
                 html_content = fh.read()
             self.assertIn("ML Probability:", html_content)
-            self.assertIn("#7c3aed", html_content)
+            self.assertIn("#ea580c", html_content)
+            self.assertNotIn("Research Edition", html_content)
             self.assertIn("NON-ANN ML TRIAGE", html_content)
 
             # Interactive launcher forwards to sidik.cli.run_interactive_cli
@@ -196,13 +197,15 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertFalse(app_plain.is_ml_edition)
             self.assertEqual(app_plain._accent["primary"], "#3b82f6")
             self.assertIn("Deterministic Edition", app_plain.version_badge.cget("text"))
+            self.assertNotIn("Research Edition", app_plain.version_badge.cget("text"))
 
             ml_root = tk.Toplevel(root)
             ml_root.withdraw()
             app_ml = SecurityAnalyzerGUI(ml_root, enable_ml=True, app_brand="SIDIK-ML")
             self.assertIsNotNone(app_ml.ml_plugin)
             self.assertTrue(app_ml.is_ml_edition)
-            self.assertEqual(app_ml._accent["primary"], "#8b5cf6")
+            self.assertEqual(app_ml._accent["primary"], "#f59e0b")
+            self.assertNotIn("Research Edition", app_ml.version_badge.cget("text"))
             self.assertTrue(hasattr(app_ml, "ml_edition_pill"))
             self.assertTrue(hasattr(app_ml, "chk_ml"))
             self.assertTrue(app_ml.var_ml_enabled.get())

@@ -3,8 +3,8 @@
 ## [0.5.0] - 2026-11-24
 - Synced package version (`sidik_ml.__version__`, `SidikMLPlugin.version`, `HybridTriagePipeline.model_version` default) to `0.5.0` and updated minimum dependency to `sidik-security>=1.3.0,<2.0.0`.
 - Added `--version` / `-v` flag to `sidik-ml` CLI displaying `SIDIK-ML v0.5.0` alongside the active Core SIDIK version.
-- Paired with `SIDIK v1.3.0` to deliver an unmistakable *Electric Violet* (`#8b5cf6`) identity across `sidik-ml gui`, `sidik-ml-gui`, purple `sidik-ml>` TUI console (`sidik-ml interactive`), and ML-triaged Console/Markdown/HTML reports (`NON-ANN ML TRIAGE`).
-- Expanded `tests/test_plugin_integration.py` to assert `sidik-ml --version`, `SecurityAnalyzerGUI` theme differentiation, and violet HTML report rendering, and updated CI to install `SIDIK@v1.3.0`.
+- Paired with `SIDIK v1.3.0` to deliver an unmistakable *Amber Orange* (`#f59e0b` / `#ea580c`) identity across `sidik-ml gui`, `sidik-ml-gui`, yellow/amber `sidik-ml>` TUI console (`sidik-ml interactive`), and ML-triaged Console/Markdown/HTML reports (`NON-ANN ML TRIAGE`).
+- Expanded `tests/test_plugin_integration.py` to assert `sidik-ml --version`, `SecurityAnalyzerGUI` theme differentiation, and amber-orange HTML report rendering, and updated CI to install `SIDIK@v1.3.0`.
 
 ## [0.4.0] - 2026-11-24
 - Added `sidik_ml.plugin` (`SidikMLPlugin`, `create_plugin()`, `resolve_model_and_sha256()`, `discover_default_model()`) and registered entry point `sidik.plugins` (`sidik-ml`) in `pyproject.toml`.

@@ -8,8 +8,8 @@
 *Explainable Classical Non-ANN Machine Learning Extension for False Positive Reduction in SIDIK Static Secret Detection*
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3b82f6.svg)](#)
-[![Version v0.5.0](https://img.shields.io/badge/Version-v0.5.0-8b5cf6.svg)](#)
-[![Paradigm Non-ANN Only](https://img.shields.io/badge/Paradigm-Non--ANN%20Only-8b5cf6.svg)](#)
+[![Version v0.5.0](https://img.shields.io/badge/Version-v0.5.0-f59e0b.svg)](#)
+[![Paradigm Non-ANN Only](https://img.shields.io/badge/Paradigm-Non--ANN%20Only-ea580c.svg)](#)
 [![Random Forest MCC 0.7692](https://img.shields.io/badge/RF%20F1-0.9636%20%7C%20MCC%200.7692-10b981.svg)](#)
 [![Unit Tests](https://img.shields.io/badge/Unit%20Tests-17%2F17%20Passing-22c55e.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-a855f7.svg)](#)
@@ -24,7 +24,7 @@
 
 **SIDIK-ML** (`v0.5.0`) adalah paket perangkat lunak Python independen yang memperluas kemampuan pemindai deterministik [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.0`) dengan lapisan penyaringan *false positive* berbasis **klasifikasi klasik *Non-Artificial Neural Network* (*Non-ANN*) yang terjelaskan**.
 
-Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *deep neural network* berbobot ratusan megabita, `SIDIK-ML` bekerja sebagai *plugin* opsional melalui kontrak data aman `SecretCandidate` (`schema_version = "1.0.0"`) dan *entry point* standar `sidik.plugins`. Ketika dijalankan melalui `sidik-ml gui`, `sidik-ml interactive`, maupun `--enable-ml`, antarmuka menampilkan tema khusus **Electric Violet (`#8b5cf6`)** lengkap dengan lencana `NON-ANN ML`, *prompt* `sidik-ml>`, serta dasbor HTML bernuansa ungu agar langsung terbedakan dari mode deterministik standar **Ocean Blue (`#3b82f6`)** milik `SIDIK`.
+Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *deep neural network* berbobot ratusan megabita, `SIDIK-ML` bekerja sebagai *plugin* opsional melalui kontrak data aman `SecretCandidate` (`schema_version = "1.0.0"`) dan *entry point* standar `sidik.plugins`. Ketika dijalankan melalui `sidik-ml gui`, `sidik-ml interactive`, maupun `--enable-ml`, antarmuka menampilkan tema khusus **Amber Orange (`#f59e0b` / `#ea580c`)** lengkap dengan lencana `NON-ANN ML`, *prompt* `sidik-ml>`, serta dasbor HTML bernuansa kuning-oranye agar langsung terbedakan dari mode deterministik standar **Ocean Blue (`#3b82f6`)** milik `SIDIK`.
 
 ---
 
@@ -190,7 +190,7 @@ pytest tests -v
 
 **SIDIK-ML** (`v0.5.0`) is an independent Python package extending the deterministic [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.0`) security analyzer with **explainable classical Non-Artificial Neural Network (Non-ANN) machine learning** for false-positive reduction in hardcoded secret detection.
 
-Instead of forking SIDIK's UI or introducing heavy deep learning weights, `SIDIK-ML` integrates through the leak-safe `SecretCandidate` (`schema_version = "1.0.0"`) contract and the standard `sidik.plugins` entry-point group. When launched via `sidik-ml gui`, `sidik-ml interactive`, or `--enable-ml`, the shared UI switches cleanly into an **Electric Violet (`#8b5cf6`)** identity with `NON-ANN ML` badges, purple `sidik-ml>` console prompts, and purple-themed HTML/Markdown triage dashboards, clearly distinguishing hybrid ML analysis from Core SIDIK's **Ocean Blue (`#3b82f6`)** deterministic edition.
+Instead of forking SIDIK's UI or introducing heavy deep learning weights, `SIDIK-ML` integrates through the leak-safe `SecretCandidate` (`schema_version = "1.0.0"`) contract and the standard `sidik.plugins` entry-point group. When launched via `sidik-ml gui`, `sidik-ml interactive`, or `--enable-ml`, the shared UI switches cleanly into an **Amber Orange (`#f59e0b` / `#ea580c`)** identity with `NON-ANN ML` badges, amber-yellow `sidik-ml>` console prompts, and warm orange-themed HTML/Markdown triage dashboards, clearly distinguishing hybrid ML analysis from Core SIDIK's **Ocean Blue (`#3b82f6`)** deterministic edition.
 
 ## ✨ Key Capabilities
 
@@ -220,7 +220,7 @@ On 25 external Python repositories (`1,193` `.py` files), the CV-selected model 
 pip install -e "..\SIDIK[gui]"
 pip install -e .
 
-# Check version and launch Electric Violet SIDIK-ML Interactive CLI (TUI) or Desktop GUI (symmetric with sidik)
+# Check version and launch Amber-Orange SIDIK-ML Interactive CLI (TUI) or Desktop GUI (symmetric with sidik)
 sidik-ml --version
 sidik-ml -i --lang en          # or: sidik-ml interactive / python -m sidik_ml -i / run_sidik_ml_cli.bat
 sidik-ml --gui                 # or: sidik-ml gui / sidik-ml-gui / python -m sidik_ml --gui / run_sidik_ml.bat

@@ -91,7 +91,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="SIDIK-ML: Explainable Non-ANN ML Extension for SIDIK Static Security Analysis",
         epilog=(
             "Examples (symmetric with SIDIK):\n"
-            "  sidik-ml -i                                        # Launch Electric Violet Interactive Console (TUI)\n"
+            "  sidik-ml -i                                        # Launch Amber-Orange Interactive Console (TUI)\n"
             "  sidik-ml --gui                                     # Launch SIDIK-ML Desktop GUI (alias: sidik-ml gui)\n"
             "  sidik-ml .                                         # Scan current directory with ML triage\n"
             "  sidik-ml --target . --include-deps --format html   # Full Secret + SCA HTML dashboard\n"
