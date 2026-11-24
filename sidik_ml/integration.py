@@ -23,7 +23,7 @@ class HybridTriagePipeline:
         scanner: Optional[SecurityScanner] = None,
         classifier: Optional[ClassifierProtocol] = None,
         model_name: str = "deterministic_pass_through",
-        model_version: str = "0.5.4",
+        model_version: str = "0.5.5",
         policy: Optional[TriagePolicy] = None,
     ):
         self.scanner = scanner or SecurityScanner(enable_dependency_scan=False, measure_memory=False)

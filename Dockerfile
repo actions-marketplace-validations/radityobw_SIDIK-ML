@@ -1,10 +1,11 @@
 FROM python:3.11-slim
 
-ARG SIDIK_CORE_REF=v1.3.4
+ARG SIDIK_CORE_REF=v1.3.6
 
 LABEL org.opencontainers.image.source="https://github.com/radityobw/SIDIK-ML" \
       org.opencontainers.image.title="SIDIK-ML" \
       org.opencontainers.image.description="Explainable Classical Non-ANN Machine Learning Extension for SIDIK" \
+      org.opencontainers.image.authors="Radityo Budi Waskito" \
       org.opencontainers.image.licenses="MIT"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

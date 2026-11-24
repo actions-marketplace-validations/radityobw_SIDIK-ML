@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.5] - 2026-11-25
+- Corrected package, GitHub Action, container, and license author/copyright metadata across [`pyproject.toml`](pyproject.toml), [`action.yml`](action.yml), [`LICENSE`](LICENSE), [`Dockerfile`](Dockerfile), and [`.github/workflows/release.yml`](.github/workflows/release.yml) to list **Radityo Budi Waskito** as the sole author.
+- Synced default Core `SIDIK` fallback/container reference to `v1.3.6` (keeping PyPI runtime compatibility at `sidik>=1.3.4,<2.0.0`).
+
 ## [0.5.4] - 2026-11-25
 - Updated minimum Core dependency to **`sidik>=1.3.4,<2.0.0`** (with `action.yml`, `Dockerfile`, CI, and `release.yml` synced to `v1.3.4` / `v0.5.4`) and merged [`action.yml`](action.yml) into a single scan pass (`--format github --sarif-output ...`).
 - **Full CLI & CI/CD Parity (`sidik_ml/cli.py`):** Defaults to Amber-Orange `console` output (SAST + SCA), `--fail-on any` exit code enforcement (`1` on findings, `2` on missing target path), explicit `stderr` pass-through notice when no `.skops` model is loaded, `[tool.sidik]` config loading, `--severity`, `--mode`, `--baseline`, `--write-baseline`, `--sarif-output`, `--extensions`, `--exclude`, `--no-color`, `--quiet`, `--no-step-summary`, and `$GITHUB_STEP_SUMMARY` integration.

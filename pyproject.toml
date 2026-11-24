@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sidik-ml"
-version = "0.5.4"
+version = "0.5.5"
 description = "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Static Security Analysis"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -12,11 +12,6 @@ license = "MIT"
 license-files = ["LICENSE"]
 authors = [
     {name = "Radityo Budi Waskito"},
-    {name = "Fauzi Nur Ibrahim"},
-    {name = "Raditya Ahmad Pratama"},
-    {name = "Zayyan Fadhlur Rahman"},
-    {name = "Muhammad Fahri Indra Saputra"},
-    {name = "Mohamad Hilman"}
 ]
 keywords = ["security", "sast", "secret-detection", "machine-learning", "explainable-ai", "non-neural"]
 classifiers = [
