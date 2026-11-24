@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sidik-ml"
+version = "0.1.0"
+description = "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Static Security Analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Radityo Budi Waskito"},
+    {name = "Fauzi Nur Ibrahim"},
+    {name = "Raditya Ahmad Pratama"},
+    {name = "Zayyan Fadhlur Rahman"},
+    {name = "Muhammad Fahri Indra Saputra"},
+    {name = "Mohamad Hilman"}
+]
+keywords = ["security", "sast", "secret-detection", "machine-learning", "explainable-ai", "non-neural"]
+dependencies = [
+    "sidik-security>=1.1.0,<2.0.0",
+]
+
+[project.optional-dependencies]
+train = [
+    "numpy>=1.26.0",
+    "pandas>=2.1.0",
+    "scipy>=1.11.0",
+    "scikit-learn>=1.4.0",
+    "skops>=0.9.0",
+]
+explain = [
+    "shap>=0.45.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "build>=1.0.0",
+    "twine>=5.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/radityobw/SIDIK-ML"
+Repository = "https://github.com/radityobw/SIDIK-ML"
+Upstream = "https://github.com/radityobw/SIDIK"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sidik_ml*"]
