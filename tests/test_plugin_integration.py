@@ -52,6 +52,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
         self.assertIsNotNone(plug, "sidik-ml entry point must be registered under sidik.plugins")
         self.assertIsInstance(plug, PostScanPlugin)
         self.assertEqual(plug.name, "sidik-ml")
+        self.assertEqual(plug.version, "0.5.0")
 
     def test_unified_secret_plus_sca_with_critical_protection_and_tamper_guard(self):
         recs = _build_contract_fixture_records()
@@ -152,6 +153,8 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             with open(out_html, "r", encoding="utf-8") as fh:
                 html_content = fh.read()
             self.assertIn("ML Probability:", html_content)
+            self.assertIn("#7c3aed", html_content)
+            self.assertIn("NON-ANN ML TRIAGE", html_content)
 
             # Interactive launcher forwards to sidik.cli.run_interactive_cli
             with patch("sidik.cli.run_interactive_cli", return_value=0) as mock_tui:
@@ -173,6 +176,15 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
 
     def test_headless_gui_mounts_ml_plugin_controls(self):
         try:
+            import io
+            from contextlib import redirect_stdout
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                with self.assertRaises(SystemExit) as ctx:
+                    cli_main(["--version"])
+            self.assertEqual(ctx.exception.code, 0)
+            self.assertIn("SIDIK-ML v0.5.0", buf.getvalue())
+
             import tkinter as tk
             from sidik.gui import SecurityAnalyzerGUI
             root = tk.Tk()
@@ -180,11 +192,22 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.skipTest(f"Tkinter display unavailable: {exc}")
         root.withdraw()
         try:
-            app = SecurityAnalyzerGUI(root, enable_ml=True, app_brand="SIDIK-ML")
-            self.assertIsNotNone(app.ml_plugin)
-            self.assertTrue(hasattr(app, "chk_ml"))
-            self.assertTrue(app.var_ml_enabled.get())
-            self.assertIn("SIDIK-ML", root.title())
+            app_plain = SecurityAnalyzerGUI(root, enable_ml=False, app_brand="SIDIK")
+            self.assertFalse(app_plain.is_ml_edition)
+            self.assertEqual(app_plain._accent["primary"], "#3b82f6")
+            self.assertIn("Deterministic Edition", app_plain.version_badge.cget("text"))
+
+            ml_root = tk.Toplevel(root)
+            ml_root.withdraw()
+            app_ml = SecurityAnalyzerGUI(ml_root, enable_ml=True, app_brand="SIDIK-ML")
+            self.assertIsNotNone(app_ml.ml_plugin)
+            self.assertTrue(app_ml.is_ml_edition)
+            self.assertEqual(app_ml._accent["primary"], "#8b5cf6")
+            self.assertTrue(hasattr(app_ml, "ml_edition_pill"))
+            self.assertTrue(hasattr(app_ml, "chk_ml"))
+            self.assertTrue(app_ml.var_ml_enabled.get())
+            self.assertIn("SIDIK-ML v0.5.0", ml_root.title())
+            ml_root.destroy()
         finally:
             root.destroy()
 

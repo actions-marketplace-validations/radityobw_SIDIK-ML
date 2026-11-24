@@ -6,8 +6,9 @@ import os
 import sys
 from typing import List, Optional
 
-from sidik import SecurityScanner
+from sidik import SecurityScanner, __version__ as SIDIK_VERSION
 from sidik.reporting.formatter import ReportFormatter
+from sidik_ml import __version__ as ML_VERSION
 from sidik_ml.dataset import load_jsonl_dataset
 from sidik_ml.features import extract_feature_dict
 from sidik_ml.integration import HybridTriagePipeline
@@ -21,6 +22,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sidik-ml",
         description="SIDIK-ML: Explainable Non-ANN ML Extension for SIDIK Static Security Analysis",
+    )
+    parser.add_argument(
+        "--version",
+        "-v",
+        action="version",
+        version=f"SIDIK-ML v{ML_VERSION} (Explainable Non-ANN ML Extension | Core SIDIK v{SIDIK_VERSION})",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
