@@ -112,6 +112,8 @@ SIDIK-ML/
 │   ├── serialization.py               # Save/load .skops aman terverifikasi SHA-256
 │   ├── training.py                    # Pipeline pelatihan reproduksibel & provenans JSON
 │   └── integration.py                 # HybridTriagePipeline (SIDIK + opsional ML classifier)
+├── notebooks/
+│   └── quickstart.ipynb               # Interactive Jupyter / Google Colab quickstart notebook
 ├── tests/                             # Unit & integration tests (pytest)
 ├── pyproject.toml                     # Konfigurasi paket, dependencies, & entry points
 ├── CHANGELOG.md
@@ -122,6 +124,8 @@ SIDIK-ML/
 ---
 
 ## 🚀 Panduan Instalasi & Pemakaian Cepat
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/radityobw/SIDIK-ML/blob/main/notebooks/quickstart.ipynb)
 
 ### 1. Instalasi Global via PyPI (Pengguna Umum & CI/CD)
 
@@ -227,6 +231,8 @@ Instead of forking SIDIK's UI or introducing heavy deep learning weights, `SIDIK
 On 25 external Python repositories (`1,193` `.py` files), the CV-selected model flags **`35.0%` (`7/20`) of deterministic alerts as false positives** with only **`+3.6 ms` (`+0.15%`) runtime overhead**. Under zero-shot domain shift on `CredDetX` (`1,094` candidates), fail-safe Hybrid Condition `C1` preserves **`F1 = 0.7969` and `MCC = +0.2075`**, outperforming both standalone deterministic SIDIK and unguarded ML classifiers.
 
 ## 🚀 Quick Start
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/radityobw/SIDIK-ML/blob/main/notebooks/quickstart.ipynb)
 
 ```bash
 # Global install from PyPI (Core SIDIK is installed automatically)
