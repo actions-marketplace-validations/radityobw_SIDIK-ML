@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1] - 2026-11-24
+- Bumped package version to `0.5.1` and required `sidik-security>=1.3.1,<2.0.0` (updating CI to install `SIDIK@v1.3.1` with Amber-Orange `#ea580c` / `#f59e0b` HTML & GUI support).
+- Added composite GitHub Action [`action.yml`](action.yml) (`SIDIK-ML Hybrid Security Scanner`) supporting Non-ANN ML triage, SARIF v2.1.0, and inline PR annotations.
+- Scrubbed private research-paper repository references from public source and documentation (`SIDIK` & `SIDIK-ML`).
+- Added symmetric CLI shorthands (`-i`, `--gui`, `.`, `-t`), `python -m sidik_ml` module entry point, and `run_sidik_ml.bat` / `run_sidik_ml_cli.bat` / `run_sidik_ml.sh` launchers.
+- Fixed Pyrefly `tk.Tk` root typing in `tests/test_plugin_integration.py` (`18/18` passing).
+
 ## [0.5.0] - 2026-11-24
 - Synced package version (`sidik_ml.__version__`, `SidikMLPlugin.version`, `HybridTriagePipeline.model_version` default) to `0.5.0` and updated minimum dependency to `sidik-security>=1.3.0,<2.0.0`.
 - Added `--version` / `-v` flag to `sidik-ml` CLI displaying `SIDIK-ML v0.5.0` alongside the active Core SIDIK version.

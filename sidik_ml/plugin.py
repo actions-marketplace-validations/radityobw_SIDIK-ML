@@ -38,15 +38,7 @@ def discover_default_model() -> Optional[Tuple[str, str]]:
         candidates.append(env_path.strip())
 
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    candidates.append(
-        os.path.join(
-            os.path.dirname(repo_root),
-            "SIDIK-ML-paper",
-            "experiments",
-            "artifacts",
-            "gradient_boosting.skops",
-        )
-    )
+    candidates.append(os.path.join(repo_root, "artifacts", "gradient_boosting.skops"))
 
     for candidate_path in candidates:
         if candidate_path and os.path.isfile(candidate_path) and os.path.isfile(f"{candidate_path}.manifest.json"):
@@ -61,7 +53,7 @@ class SidikMLPlugin:
     """SIDIK ``sidik.plugins`` entry-point adapter running Non-ANN ML triage over secret findings."""
 
     name = "sidik-ml"
-    version = "0.5.0"
+    version = "0.5.1"
     description = "Explainable Non-ANN Machine Learning Triage Plugin for SIDIK"
 
     def __init__(self) -> None:
