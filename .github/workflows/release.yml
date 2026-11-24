@@ -49,7 +49,7 @@ jobs:
         run: |
           python -m build
           python -m twine check dist/*
-          python -c "import zipfile, glob; whl=glob.glob('dist/*.whl')[0]; names=zipfile.ZipFile(whl).namelist(); assert 'sidik_ml/__main__.py' in names and 'sidik_ml/plugin.py' in names and 'sidik_ml/py.typed' in names, names"
+          python -c "import zipfile, glob; whl=glob.glob('dist/*.whl')[0]; names=zipfile.ZipFile(whl).namelist(); assert 'sidik_ml/__main__.py' in names and 'sidik_ml/plugin.py' in names and 'sidik_ml/py.typed' in names and 'sidik_ml/data/default_gradient_boosting.json' in names and 'sidik_ml/data/default_gradient_boosting.json.manifest.json' in names, names"
           cd dist && sha256sum *.whl *.tar.gz > SHA256SUMS.txt
 
       - name: Upload Distribution Artifact

@@ -23,7 +23,7 @@ from sidik_ml.features import extract_feature_dict
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.plugin import SidikMLPlugin, discover_default_model, resolve_model_and_sha256
 from sidik_ml.schemas import TriagePolicy
-from sidik_ml.serialization import fetch_verified_model, load_verified_skops_model, verify_artifact_sha256
+from sidik_ml.serialization import fetch_verified_model, load_verified_model, verify_artifact_sha256
 from sidik_ml.training import train_and_compare_models
 
 
@@ -326,8 +326,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if not model_path_arg and not args.quiet:
         print(
-            "[SIDIK-ML Notice] Running in deterministic pass-through mode (no .skops model loaded). "
-            "Supply --model <path.skops> or run 'sidik-ml fetch-model' / 'sidik-ml train' to enable Non-ANN ML scoring.",
+            "[SIDIK-ML Notice] Running in deterministic pass-through mode (no verified ML model loaded). "
+            "Supply --model <path.skops|.json> or run 'sidik-ml fetch-model' / 'sidik-ml train' to enable Non-ANN ML scoring.",
             file=sys.stderr,
         )
 
@@ -353,8 +353,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         classifier = None
         model_name = "deterministic_pass_through"
         if model_path_arg and resolved_sha:
-            classifier = load_verified_skops_model(model_path_arg, resolved_sha)
-            model_name = model_path_arg
+            classifier = load_verified_model(model_path_arg, resolved_sha)
+            model_name = os.path.basename(model_path_arg)
 
         compact_scanner = SecurityScanner(
             enable_dependency_scan=False,

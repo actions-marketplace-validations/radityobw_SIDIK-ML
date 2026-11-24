@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.7] - 2026-11-25
+- **Bundled Out-of-the-Box Portable Non-ANN Model (`sidik_ml/data/default_gradient_boosting.json`):** Embedded the SHA-256-verified *Gradient Boosting* ensemble (`~46 KB`, 100 trees, trained strictly repository-grouped on Apache-2.0 `Samsung/CredData`, reproducing scikit-learn probabilities within `max_abs_diff < 1e-12` across all Python/scikit-learn versions). Global `pip install sidik-ml` users now get live ML probability triage automatically across CLI, Interactive TUI, Desktop GUI, and `sidik --enable-ml` without needing a separate model download.
+- **Portable Tree Serialization & Unified Verification API (`sidik_ml/serialization.py`, `sidik_ml/plugin.py`):** Added `PortableGradientBoostingClassifier`, `export_portable_gbdt_model()`, `load_verified_portable_model()`, `load_verified_model()` (dispatching `.json` portable artifacts or `.skops` artifacts under SHA-256 verification), and `get_bundled_default_model_path()`.
+
 ## [0.5.6] - 2026-11-25
 - **Single-Source-of-Truth Versioning (`sidik_ml/_version.py`):** Configured `[tool.setuptools.dynamic]` in [`pyproject.toml`](pyproject.toml) so `sidik_ml/__init__.py`, `plugin.py`, `integration.py`, package metadata, and integration tests all derive from one authoritative `__version__`.
 - **Unpinned PyPI Core Resolution & Live README Badges:** Updated [`Dockerfile`](Dockerfile), [`action.yml`](action.yml), [`.github/workflows/release.yml`](.github/workflows/release.yml), and [`.github/workflows/sidik-ml-ci.yml`](.github/workflows/sidik-ml-ci.yml) to resolve `sidik>=1.3.4,<2.0.0` directly from PyPI (falling back to `@main`), and replaced static version/cross-repo badges in [`README.md`](README.md) with live PyPI, GitHub Release, and CI Shields.io badges while unifying report format references (`8`).

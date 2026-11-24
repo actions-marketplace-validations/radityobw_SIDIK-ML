@@ -73,6 +73,7 @@ include = ["sidik_ml*"]
 
 [tool.setuptools.package-data]
 "sidik_ml" = ["py.typed"]
+"sidik_ml.data" = ["*.json"]
 
 [tool.setuptools.dynamic]
 version = {attr = "sidik_ml._version.__version__"}

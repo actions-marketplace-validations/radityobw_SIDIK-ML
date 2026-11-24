@@ -385,6 +385,69 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertTrue(os.path.isfile(dest))
             self.assertTrue(os.path.isfile(f"{dest}.manifest.json"))
 
+    def test_bundled_portable_gbdt_out_of_the_box_and_roundtrip_equivalence(self):
+        import io
+        from contextlib import redirect_stderr
+        from sidik_ml.explainability import explain_single_candidate
+        from sidik_ml.plugin import discover_default_model
+        from sidik_ml.serialization import (
+            PortableGradientBoostingClassifier,
+            export_portable_gbdt_model,
+            get_bundled_default_model_path,
+            load_verified_model,
+        )
+
+        # 1. Bundled model exists, auto-discovered, loads safely, and rejects tamper
+        bundled = get_bundled_default_model_path()
+        self.assertIsNotNone(bundled)
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("SIDIK_ML_MODEL_PATH", None)
+            discovered = discover_default_model()
+        self.assertIsNotNone(discovered)
+        model_path, model_sha = discovered
+        self.assertEqual(os.path.basename(model_path), "default_gradient_boosting.json")
+        portable = load_verified_model(model_path, model_sha)
+        self.assertIsInstance(portable, PortableGradientBoostingClassifier)
+        self.assertEqual(portable.n_features_in_, len(FEATURE_NAMES))
+        with self.assertRaises(ValueError):
+            load_verified_model(model_path, "0" * 64)
+
+        # 2. Round-trip export matches scikit-learn GradientBoostingClassifier within 1e-9
+        recs = _build_contract_fixture_records()
+        X, y, _ = records_to_matrix(recs)
+        clf = create_non_ann_model("gradient_boosting", random_state=42)
+        clf.fit(X, y)
+        with tempfile.TemporaryDirectory() as tmp:
+            exp_path = os.path.join(tmp, "rt_gbdt.json")
+            manifest = export_portable_gbdt_model(clf, exp_path)
+            loaded = load_verified_model(exp_path, manifest["sha256"])
+            sk_probs = clf.predict_proba(X)
+            pt_probs = loaded.predict_proba(X)
+            max_diff = max(abs(float(sp[1]) - float(pp[1])) for sp, pp in zip(sk_probs, pt_probs))
+            self.assertLess(max_diff, 1e-9)
+            self.assertEqual(
+                explain_single_candidate(clf, X[0]),
+                explain_single_candidate(loaded, X[0]),
+            )
+
+            # 3. CLI & SidikMLPlugin automatically use bundled GBDT out-of-the-box without --model
+            proj_dir = os.path.join(tmp, "oob_app")
+            os.makedirs(proj_dir)
+            with open(os.path.join(proj_dir, "app.py"), "w", encoding="utf-8") as fh:
+                fh.write("aws_prod_key = 'AKIAJ2M4K8P9Q3R7W5T1'\n")
+            out_json = os.path.join(tmp, "oob.json")
+            err_buf = io.StringIO()
+            with redirect_stderr(err_buf):
+                rc = cli_main([proj_dir, "--mode", "secret", "--fail-on", "none", "--format", "json", "-o", out_json])
+            self.assertEqual(rc, 0)
+            self.assertNotIn("pass-through mode", err_buf.getvalue())
+            with open(out_json, "r", encoding="utf-8") as fh:
+                doc = json.load(fh)
+            self.assertEqual(len(doc["findings"]), 1)
+            ml_meta = doc["findings"][0]["metadata"]["ml_triage"]
+            self.assertEqual(ml_meta["model_name"], "default_gradient_boosting.json")
+            self.assertEqual(ml_meta["model_version"], ML_VERSION)
+
 
 if __name__ == "__main__":
     unittest.main()

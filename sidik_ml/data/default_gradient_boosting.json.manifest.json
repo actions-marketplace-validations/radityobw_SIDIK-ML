@@ -1,0 +1,16 @@
+{
+  "model_file": "default_gradient_boosting.json",
+  "sha256": "1f668b18e76736654c9e2cd0553afe096c1be01d2f75e90f08d167f0c31a2b38",
+  "format": "sidik_portable_gbdt_v1",
+  "metadata": {
+    "model_name": "gradient_boosting",
+    "training_corpus": "Samsung/CredData (Apache-2.0, 258 train candidates across 86 repositories)",
+    "candidate_schema_version": "1.0.0",
+    "feature_schema_version": "1.0.0",
+    "random_state": 42,
+    "selection_criterion": "5-fold StratifiedGroupKFold CV F1 (tie-break MCC) on train repos",
+    "portable_version_independent": true,
+    "n_trees": 100,
+    "n_features": 30
+  }
+}

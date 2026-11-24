@@ -8,11 +8,15 @@ from sidik.models import ScanReport
 from sidik_ml._version import __version__
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.schemas import TriagePolicy
-from sidik_ml.serialization import get_ml_cache_dir, load_verified_skops_model
+from sidik_ml.serialization import (
+    get_bundled_default_model_path,
+    get_ml_cache_dir,
+    load_verified_model,
+)
 
 
 def resolve_model_and_sha256(model_path: str, sha256: Optional[str] = None) -> Tuple[str, str]:
-    """Resolves a .skops model path and verifies presence of its SHA-256 checksum."""
+    """Resolves a .skops or portable .json model path and verifies presence of its SHA-256 checksum."""
     if not model_path or not os.path.isfile(model_path):
         raise ValueError(f"Model artifact not found: {model_path}")
     if sha256 and sha256.strip():
@@ -32,7 +36,7 @@ def resolve_model_and_sha256(model_path: str, sha256: Optional[str] = None) -> T
 
 
 def discover_default_model() -> Optional[Tuple[str, str]]:
-    """Discovers an optional local .skops model artifact and its manifest SHA-256."""
+    """Discovers a verified local, cached, or bundled portable model and its manifest SHA-256."""
     candidates = []
     env_path = os.environ.get("SIDIK_ML_MODEL_PATH")
     if env_path:
@@ -41,11 +45,15 @@ def discover_default_model() -> Optional[Tuple[str, str]]:
     models_cache_dir = os.path.join(get_ml_cache_dir(), "models")
     if os.path.isdir(models_cache_dir):
         for fname in sorted(os.listdir(models_cache_dir)):
-            if fname.endswith(".skops"):
+            if fname.endswith(".skops") or (fname.endswith(".json") and not fname.endswith(".manifest.json")):
                 candidates.append(os.path.join(models_cache_dir, fname))
 
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     candidates.append(os.path.join(repo_root, "artifacts", "gradient_boosting.skops"))
+
+    bundled_default = get_bundled_default_model_path()
+    if bundled_default:
+        candidates.append(bundled_default)
 
     for candidate_path in candidates:
         if candidate_path and os.path.isfile(candidate_path) and os.path.isfile(f"{candidate_path}.manifest.json"):
@@ -67,7 +75,7 @@ class SidikMLPlugin:
         self._model_cache: Dict[Tuple[str, str], Any] = {}
 
     def discover_default_model(self) -> Optional[Tuple[str, str]]:
-        """Exposes local verified model auto-discovery to SIDIK interactive CLI and GUI."""
+        """Exposes verified local or bundled model auto-discovery to SIDIK interactive CLI and GUI."""
         return discover_default_model()
 
     def _get_classifier(self, model_path: Optional[str], sha256: Optional[str]) -> Tuple[Optional[Any], str]:
@@ -76,7 +84,7 @@ class SidikMLPlugin:
         resolved_path, resolved_sha = resolve_model_and_sha256(model_path, sha256)
         cache_key = (os.path.abspath(resolved_path), resolved_sha.lower())
         if cache_key not in self._model_cache:
-            self._model_cache[cache_key] = load_verified_skops_model(resolved_path, resolved_sha)
+            self._model_cache[cache_key] = load_verified_model(resolved_path, resolved_sha)
         return self._model_cache[cache_key], os.path.basename(resolved_path)
 
     def triage_report(
@@ -90,6 +98,10 @@ class SidikMLPlugin:
         opts = options or {}
         model_path = opts.get("model_path")
         sha256 = opts.get("sha256")
+        if not model_path and not bool(opts.get("pass_through", False)):
+            discovered = discover_default_model()
+            if discovered is not None:
+                model_path, sha256 = discovered
         threshold = float(opts.get("threshold", 0.5))
         suppress_fp = bool(opts.get("suppress_false_positives", False))
         candidate_wide = bool(opts.get("candidate_wide", False))

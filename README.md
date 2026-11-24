@@ -43,8 +43,9 @@ Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *d
 5. **Integrasi Penuh *Plugin* (`sidik.plugins`) & *Thin Launcher* TUI/GUI/SCA:**
    - Terdaftar ke grup `sidik.plugins` melalui [plugin.py](https://github.com/radityobw/SIDIK-ML/blob/main/sidik_ml/plugin.py), sehingga perintah `sidik-ml interactive`, `sidik-ml gui`, dan `sidik-ml-gui` membuka antarmuka TUI serta *Desktop GUI* `SIDIK` dengan kontrol *ML Triage* aktif.
    - `sidik-ml scan` mendukung paritas CI/CD (`--fail-on`, `--severity`, `--mode`, `--baseline`, `--sarif-output`), `--include-deps` (OSV SCA), `fetch-model`, serta 8 format laporan (`console`, `compact`, `sarif`, `github`, `html`, `markdown`, `json`, `csv`).
-6. **Serialisasi Luring Terverifikasi *SHA-256* (`skops`):**
-   - Artefak `.skops` selalu diverifikasi *checksum SHA-256*-nya (`verify_artifact_sha256` atau otomatis dari `<model>.manifest.json`) dan diperiksa terhadap daftar putih tipe aman (`SAFE_SKOPS_TYPE_PREFIXES`) tanpa `pickle`/`joblib` mentah.
+6. **Model Bawaan Siap Pakai (*Out-of-the-Box*) & Serialisasi Terverifikasi *SHA-256* (`portable JSON` & `skops`):**
+   - Menyertakan model bawaan portabel *Gradient Boosting* terverifikasi *SHA-256* (`~46 KB`, 100 pohon terlatih pada korpus terbuka Apache-2.0 *Samsung/CredData*) yang aktif otomatis sejak instalasi tanpa perlu mengunduh berkas tambahan serta 100% bebas *version skew* lintas versi `scikit-learn`/Python.
+   - Juga mendukung artefak `.skops` maupun `.json` kustom berverifikasi *checksum SHA-256* (`verify_artifact_sha256` atau `<model>.manifest.json`) dengan daftar putih tipe aman (`SAFE_SKOPS_TYPE_PREFIXES`) tanpa `pickle`/`joblib` mentah.
 
 ---
 
@@ -212,7 +213,7 @@ Instead of forking SIDIK's UI or introducing heavy deep learning weights, `SIDIK
 * **30 Leakage-Free Static Features (`FEATURE_SCHEMA_VERSION = "1.0.0"`):** Extracts string statistics, Shannon entropy metrics, rule indicators, lexical cues, code structure, and file context without persisting raw credentials.
 * **Zero Data Leakage Splitting & Verification:** Enforces cross-repo `value_sha256` collision resolution, `StratifiedGroupKFold` grouped by `repo_id`, and explicit `assert_no_leakage()` checks.
 * **Fail-Safe Hybrid `TriagePolicy`:** Runs in advisory mode by default (`suppress_false_positives=False`) and shields `CRITICAL` findings (`never_suppress_severities=("CRITICAL",)`).
-* **Hardened Offline `skops` Loading:** Validates `.skops` model digests against explicit SHA-256 checksums or companion `.manifest.json` files and restricts deserialization to `SAFE_SKOPS_TYPE_PREFIXES`.
+* **Out-of-the-Box Bundled Portable Model & Hardened `skops` Loading:** Ships a SHA-256-verified portable *Gradient Boosting* model (`~46 KB`, trained on Apache-2.0 *Samsung/CredData*, zero `scikit-learn` version skew) active automatically on install, while also supporting custom `.skops`/`.json` artifacts with explicit SHA-256 or `.manifest.json` validation and `SAFE_SKOPS_TYPE_PREFIXES` allowlisting.
 
 ## 📊 Verified Empirical Highlights (`CredData` Held-Out `N = 64`, 25 Repos, & `CredDetX`)
 
@@ -237,9 +238,10 @@ sidik-ml --version
 sidik-ml -i --lang en          # or: sidik-ml interactive / python -m sidik_ml -i / run_sidik_ml_cli.bat
 sidik-ml --gui                 # or: sidik-ml gui / sidik-ml-gui / python -m sidik_ml --gui / run_sidik_ml.bat
 
-# Run unified Secret + SCA scan (defaults to console output and --fail-on any)
+# Run unified Secret + SCA scan (uses bundled portable GBDT model out-of-the-box)
 sidik-ml . --fail-on high
-sidik-ml --target path/to/project --include-deps --model model.skops --format html -o ml_report.html --lang en
+sidik-ml --target path/to/project --include-deps --format html -o ml_report.html --lang en
+sidik-ml --target path/to/project --model custom_model.skops --format html -o ml_report.html --lang en
 sidik-ml fetch-model https://example.com/gradient_boosting.skops --sha256 <hex_digest>
 
 # Run tests
