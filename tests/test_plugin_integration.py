@@ -9,11 +9,39 @@ from unittest.mock import patch
 from sidik import SecurityScanner
 from sidik.plugins import PostScanPlugin, get_plugin
 from sidik_ml.cli import build_parser, main as cli_main
-from sidik_ml.dataset import records_to_matrix
+from sidik_ml.dataset import LabeledCandidateRecord, records_to_matrix
+from sidik_ml.features import FEATURE_NAMES
 from sidik_ml.models import create_non_ann_model
 from sidik_ml.plugin import SidikMLPlugin, resolve_model_and_sha256
 from sidik_ml.serialization import save_verified_skops_model
-from tests.test_models_and_training import _build_contract_fixture_records
+
+
+def _build_contract_fixture_records() -> list[LabeledCandidateRecord]:
+    """Builds self-contained synthetic contract-test records for plugin integration checks."""
+    records = []
+    for repo_idx in range(10):
+        repo = f"contract_repo_{repo_idx}"
+        for is_pos in (1, 0):
+            feats = {name: 0.0 for name in FEATURE_NAMES}
+            feats["str_length"] = 32.0 if is_pos else 16.0
+            feats["shannon_entropy"] = 4.3 + (0.05 * (repo_idx % 3)) if is_pos else 2.2 + (0.05 * (repo_idx % 3))
+            feats["meets_entropy_threshold"] = 1.0 if is_pos else 0.0
+            feats["has_positive_keyword"] = 1.0 if is_pos else 0.0
+            feats["is_test_path"] = 0.0 if is_pos else 1.0
+            feats["is_placeholder_or_mock"] = 0.0 if is_pos else 1.0
+            feats["passed_deterministic_filter"] = 1.0
+            records.append(LabeledCandidateRecord(
+                candidate_id=f"cid_{repo_idx}_{is_pos}",
+                repo_id=repo,
+                file_path="src/cfg.py" if is_pos else "tests/test_cfg.py",
+                value_sha256=f"sha_{repo_idx}_{is_pos}",
+                masked_context=f"ctx_{repo_idx}_{is_pos}",
+                label=is_pos,
+                features=feats,
+                deterministic_passed=True,
+                severity="HIGH" if is_pos else "MEDIUM",
+            ))
+    return records
 
 
 class TestSidikMLPluginIntegration(unittest.TestCase):
@@ -121,7 +149,8 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             ])
             self.assertEqual(rc, 0)
             self.assertTrue(os.path.isfile(out_html))
-            html_content = open(out_html, "r", encoding="utf-8").read()
+            with open(out_html, "r", encoding="utf-8") as fh:
+                html_content = fh.read()
             self.assertIn("ML Probability:", html_content)
 
             # Interactive launcher forwards to sidik.cli.run_interactive_cli
