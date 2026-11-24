@@ -47,7 +47,27 @@ SIDIK-ML/
 
 ---
 
+## Instalasi & Aktivasi Lingkungan (*Virtual Environment*)
+
+`SIDIK-ML` menggunakan mesin inti, SCA OSV, CLI interaktif, serta GUI milik `SIDIK` (`sidik-security>=1.2.0`), sehingga keduanya harus dipasang di **lingkungan Python (`.venv`) yang sama**:
+
+```bash
+# Dari direktori SIDIK-ML/ dengan venv SIDIK aktif
+..\SIDIK\.venv\Scripts\Activate.ps1       # Windows PowerShell
+# source ../SIDIK/.venv/bin/activate      # Linux / macOS
+
+# Pasang SIDIK (bersama GUI) dan SIDIK-ML secara editable
+pip install -e "..\SIDIK[gui]"
+pip install -e .
+```
+
+> **Catatan Windows PowerShell:** Apabila Anda membuka langsung folder `SIDIK\.venv\Scripts` tanpa menjalankan `Activate.ps1`, PowerShell tidak memuat perintah dari folder aktif secara otomatis. Gunakan awalan `.\` (misalnya `.\sidik-ml gui`, `.\sidik-ml interactive`, atau `.\sidik-ml-gui`), atau aktifkan *virtual environment* terlebih dahulu dengan `.\Activate.ps1`. Jika skrip aktivasi terblokir kebijakan eksekusi PowerShell, jalankan perintah lewat `python -m sidik_ml.cli ...`.
+
+---
+
 ## Pemakaian Singkat
+
+Melalui *entry point* `sidik.plugins`, perintah `sidik-ml` dan `sidik` berbagi antarmuka CLI interaktif (TUI), *Desktop GUI*, serta 7 format laporan yang sama:
 
 ```bash
 # Pindai path dengan kebijakan triage aman (tanpa supresi default)
