@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5.2] - 2026-11-24
+- Synced minimum Core dependency to `sidik-security>=1.3.2,<2.0.0` (including Marketplace-validated `SIDIK` `action.yml`, CI, and `Dockerfile` `SIDIK_CORE_REF=v1.3.2`).
+- Added [`Dockerfile`](Dockerfile), [`.dockerignore`](.dockerignore), and [`.github/workflows/release.yml`](.github/workflows/release.yml) for automated GitHub Release assets, `ghcr.io/radityobw/sidik-ml`, and gated PyPI Trusted Publishing.
+
 ## [0.5.1] - 2026-11-24
 - Bumped package version to `0.5.1` and required `sidik-security>=1.3.1,<2.0.0` (updating CI to install `SIDIK@v1.3.1` with Amber-Orange `#ea580c` / `#f59e0b` HTML & GUI support).
 - Added composite GitHub Action [`action.yml`](action.yml) (`SIDIK-ML Hybrid Security Scanner`) supporting Non-ANN ML triage, SARIF v2.1.0, and inline PR annotations.

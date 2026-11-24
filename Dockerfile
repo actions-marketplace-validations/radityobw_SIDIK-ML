@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-ARG SIDIK_CORE_REF=v1.3.1
+ARG SIDIK_CORE_REF=v1.3.2
 
 LABEL org.opencontainers.image.source="https://github.com/radityobw/SIDIK-ML" \
       org.opencontainers.image.title="SIDIK-ML" \
