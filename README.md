@@ -2,7 +2,9 @@
 
 **Ekstensi *Machine Learning* *Non-Neural* yang Dapat Dijelaskan (*Explainable Non-ANN ML*) untuk Reduksi *False Positive* pada Deteksi *Hardcoded Secret* SIDIK**
 
-`SIDIK-ML` adalah paket perangkat lunak Python independen (`v0.3.0`) yang mengonsumsi [`sidik-security`](https://github.com/radityobw/SIDIK) (`>=1.1.0,<2.0.0`) melalui kontrak data berversi `SecretCandidate` (`schema_version = "1.0.0"`).
+`SIDIK-ML` adalah paket perangkat lunak Python independen (`v0.4.0`) yang mengonsumsi [`sidik-security`](https://github.com/radityobw/SIDIK) (`>=1.2.0,<2.0.0`) melalui kontrak data berversi `SecretCandidate` (`schema_version = "1.0.0"`) sekaligus mendaftarkan *entry point* `sidik.plugins`.
+
+Dengan arsitektur *plugin entry-point* dan *thin launcher*, `SIDIK-ML` kini otomatis memperkaya **CLI**, **CLI Interaktif (TUI)**, **Desktop GUI (`sidik-gui` / `sidik-ml-gui`)**, **OSV SCA**, dan **7 format laporan** milik `SIDIK` tanpa duplikasi kode antarmuka.
 
 ---
 
@@ -21,7 +23,8 @@
 SIDIK-ML/
 ├── sidik_ml/
 │   ├── __init__.py
-│   ├── cli.py             # Antarmuka CLI (`sidik-ml scan`, `extract-features`, `verify-model`, `train`)
+│   ├── cli.py             # Antarmuka CLI, peluncur interactive (TUI) & gui, ekstrak fitur, train
+│   ├── plugin.py          # Adapter entry point sidik.plugins (SidikMLPlugin & auto-manifest SHA-256)
 │   ├── schemas.py         # MLPrediction, HybridFinding, TriagePolicy
 │   ├── features.py        # 30 fitur statis bebas target leakage dari SecretCandidate
 │   ├── models.py          # 5 model Non-ANN & neural exclusion guard
@@ -34,7 +37,8 @@ SIDIK-ML/
 ├── tests/
 │   ├── test_contract.py
 │   ├── test_dataset_and_leakage.py
-│   └── test_models_and_training.py
+│   ├── test_models_and_training.py
+│   └── test_plugin_integration.py
 ├── pyproject.toml
 ├── CHANGELOG.md
 ├── LICENSE
@@ -48,6 +52,17 @@ SIDIK-ML/
 ```bash
 # Pindai path dengan kebijakan triage aman (tanpa supresi default)
 sidik-ml scan path/to/project --json
+
+# Pindai terpadu (Secret + OSV SCA) dengan ekspor laporan HTML / SARIF / Markdown
+sidik-ml scan path/to/project --include-deps --model model.skops --format html -o hasil_ml.html
+
+# Luncurkan Interactive CLI Console (TUI) atau Desktop GUI dengan plugin SIDIK-ML aktif
+sidik-ml interactive
+sidik-ml gui
+sidik-ml-gui
+
+# Atau gunakan langsung dari perintah SIDIK standar
+sidik --target path/to/project --enable-ml --ml-model model.skops
 
 # Ekspor fitur bebas leakage dari kandidat untuk anotasi / eksperimen
 sidik-ml extract-features path/to/project --output candidates.jsonl --repo-id my_repo

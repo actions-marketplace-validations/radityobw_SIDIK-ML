@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0] - 2026-11-24
+- Added `sidik_ml.plugin` (`SidikMLPlugin`, `create_plugin()`, `resolve_model_and_sha256()`, `discover_default_model()`) and registered entry point `sidik.plugins` (`sidik-ml`) in `pyproject.toml`.
+- Added thin launchers `sidik-ml interactive` (TUI) and `sidik-ml gui` / `sidik-ml-gui` delegating directly to `SIDIK`'s shared UI (`v1.2.0`) with zero UI duplication.
+- Extended `sidik-ml scan` with `--include-deps` (unified OSV SCA), `--format` (`compact`, `console`, `json`, `markdown`, `csv`, `html`, `sarif`, `github`), `--output`, `--lang`, and automatic `.skops.manifest.json` SHA-256 resolution.
+- Added end-to-end plugin discovery, unified SAST+SCA, and GUI integration tests in `tests/test_plugin_integration.py`.
+
 ## [0.3.0] - 2026-11-24
 - Added `resolve_cross_repo_value_duplicates()` in `sidik_ml.dataset` to eliminate cross-repository `value_sha256` leakage and conflicting-label hash collisions before splitting.
 - Added `stratified_repository_split()` in `sidik_ml.dataset` and `use_stratified_split` / `cv_summary` selection via `StratifiedGroupKFold` in `sidik_ml.training`.

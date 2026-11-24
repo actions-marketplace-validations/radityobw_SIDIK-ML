@@ -33,11 +33,15 @@ from sidik_ml.serialization import (
 )
 from sidik_ml.training import collect_provenance, train_and_compare_models
 from sidik_ml.integration import HybridTriagePipeline
+from sidik_ml.plugin import SidikMLPlugin, create_plugin, resolve_model_and_sha256
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "__version__",
+    "SidikMLPlugin",
+    "create_plugin",
+    "resolve_model_and_sha256",
     "MLPrediction",
     "HybridFinding",
     "TriagePolicy",

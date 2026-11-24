@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sidik-ml"
-version = "0.3.0"
+version = "0.4.0"
 description = "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Static Security Analysis"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -19,7 +19,7 @@ authors = [
 ]
 keywords = ["security", "sast", "secret-detection", "machine-learning", "explainable-ai", "non-neural"]
 dependencies = [
-    "sidik-security>=1.1.0,<2.0.0",
+    "sidik-security>=1.2.0,<2.0.0",
     "scikit-learn>=1.4.0",
     "scipy>=1.11.0",
     "skops>=0.9.0",
@@ -41,6 +41,10 @@ dev = [
 
 [project.scripts]
 sidik-ml = "sidik_ml.cli:main"
+sidik-ml-gui = "sidik_ml.cli:launch_gui"
+
+[project.entry-points."sidik.plugins"]
+sidik-ml = "sidik_ml.plugin:create_plugin"
 
 [project.urls]
 Homepage = "https://github.com/radityobw/SIDIK-ML"
