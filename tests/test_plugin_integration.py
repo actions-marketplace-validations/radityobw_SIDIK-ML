@@ -198,9 +198,12 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertEqual(app_plain._accent["primary"], "#3b82f6")
             self.assertIn("Deterministic Edition", app_plain.version_badge.cget("text"))
             self.assertNotIn("Research Edition", app_plain.version_badge.cget("text"))
+        finally:
+            root.destroy()
 
-            ml_root = tk.Toplevel(root)
-            ml_root.withdraw()
+        ml_root = tk.Tk()
+        ml_root.withdraw()
+        try:
             app_ml = SecurityAnalyzerGUI(ml_root, enable_ml=True, app_brand="SIDIK-ML")
             self.assertIsNotNone(app_ml.ml_plugin)
             self.assertTrue(app_ml.is_ml_edition)
@@ -210,9 +213,8 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertTrue(hasattr(app_ml, "chk_ml"))
             self.assertTrue(app_ml.var_ml_enabled.get())
             self.assertIn("SIDIK-ML v0.5.0", ml_root.title())
-            ml_root.destroy()
         finally:
-            root.destroy()
+            ml_root.destroy()
 
     def test_cli_symmetric_shorthands_and_module_entrypoint(self):
         import subprocess
