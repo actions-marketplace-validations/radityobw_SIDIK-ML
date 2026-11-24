@@ -37,7 +37,7 @@ from sidik_ml.training import collect_provenance, train_and_compare_models
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.plugin import SidikMLPlugin, create_plugin, resolve_model_and_sha256
 
-__version__ = "0.5.5"
+from sidik_ml._version import __version__
 
 __all__ = [
     "__version__",

@@ -1,13 +1,16 @@
 """End-to-end integration tests for SIDIK-ML plugin discovery, unified SAST+SCA, and GUI hooks."""
 
+import importlib.metadata
 import json
 import os
+import re
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from sidik import SecurityScanner
 from sidik.plugins import PostScanPlugin, get_plugin
+from sidik_ml import __version__ as ML_VERSION
 from sidik_ml.cli import build_parser, main as cli_main
 from sidik_ml.dataset import LabeledCandidateRecord, records_to_matrix
 from sidik_ml.features import FEATURE_NAMES
@@ -48,11 +51,18 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
     """Validates sidik.plugins integration across CLI, scanner, SCA, reports, and GUI."""
 
     def test_entry_point_discovery_finds_sidik_ml(self):
+        self.assertRegex(ML_VERSION, r"^\d+\.\d+\.\d+$")
+        self.assertEqual(importlib.metadata.version("sidik-ml"), ML_VERSION)
+        self.assertEqual(importlib.metadata.metadata("sidik-ml")["Author"], "Radityo Budi Waskito")
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        with open(os.path.join(repo_root, "CHANGELOG.md"), "r", encoding="utf-8") as cf:
+            self.assertIn(f"## [{ML_VERSION}]", cf.read())
+
         plug = get_plugin("sidik-ml")
         self.assertIsNotNone(plug, "sidik-ml entry point must be registered under sidik.plugins")
         self.assertIsInstance(plug, PostScanPlugin)
         self.assertEqual(plug.name, "sidik-ml")
-        self.assertEqual(plug.version, "0.5.5")
+        self.assertEqual(plug.version, ML_VERSION)
 
     def test_unified_secret_plus_sca_with_critical_protection_and_tamper_guard(self):
         recs = _build_contract_fixture_records()
@@ -198,7 +208,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
                 with self.assertRaises(SystemExit) as ctx:
                     cli_main(["--version"])
             self.assertEqual(ctx.exception.code, 0)
-            self.assertIn("SIDIK-ML v0.5.5", buf.getvalue())
+            self.assertIn(f"SIDIK-ML v{ML_VERSION}", buf.getvalue())
 
             import tkinter as tk
             from sidik.gui import SecurityAnalyzerGUI
@@ -226,7 +236,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertTrue(hasattr(app_ml, "ml_edition_pill"))
             self.assertTrue(hasattr(app_ml, "chk_ml"))
             self.assertTrue(app_ml.var_ml_enabled.get())
-            self.assertIn("SIDIK-ML v0.5.5", ml_root.title())
+            self.assertIn(f"SIDIK-ML v{ML_VERSION}", ml_root.title())
         finally:
             ml_root.destroy()
 
@@ -290,7 +300,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             text=True,
             check=True,
         )
-        self.assertIn("SIDIK-ML v0.5.5", proc.stdout)
+        self.assertIn(f"SIDIK-ML v{ML_VERSION}", proc.stdout)
 
     def test_v054_cli_parity_single_pass_skew_and_fetch_model(self):
         import hashlib

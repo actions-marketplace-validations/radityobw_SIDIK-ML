@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.6] - 2026-11-25
+- **Single-Source-of-Truth Versioning (`sidik_ml/_version.py`):** Configured `[tool.setuptools.dynamic]` in [`pyproject.toml`](pyproject.toml) so `sidik_ml/__init__.py`, `plugin.py`, `integration.py`, package metadata, and integration tests all derive from one authoritative `__version__`.
+- **Unpinned PyPI Core Resolution & Live README Badges:** Updated [`Dockerfile`](Dockerfile), [`action.yml`](action.yml), [`.github/workflows/release.yml`](.github/workflows/release.yml), and [`.github/workflows/sidik-ml-ci.yml`](.github/workflows/sidik-ml-ci.yml) to resolve `sidik>=1.3.4,<2.0.0` directly from PyPI (falling back to `@main`), and replaced static version/cross-repo badges in [`README.md`](README.md) with live PyPI, GitHub Release, and CI Shields.io badges while unifying report format references (`8`).
+- **Automated Release Metadata Sync Tests:** Added version, `Author`, and `CHANGELOG.md` synchronization assertions inside [`tests/test_plugin_integration.py`](tests/test_plugin_integration.py).
+
 ## [0.5.5] - 2026-11-25
 - Corrected package, GitHub Action, container, and license author/copyright metadata across [`pyproject.toml`](pyproject.toml), [`action.yml`](action.yml), [`LICENSE`](LICENSE), [`Dockerfile`](Dockerfile), and [`.github/workflows/release.yml`](.github/workflows/release.yml) to list **Radityo Budi Waskito** as the sole author.
 - Synced default Core `SIDIK` fallback/container reference to `v1.3.6` (keeping PyPI runtime compatibility at `sidik>=1.3.4,<2.0.0`).

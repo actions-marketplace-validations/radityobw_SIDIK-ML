@@ -3,6 +3,7 @@
 from typing import Dict, List, Optional, Protocol, Sequence
 from sidik.core import SecurityScanner
 from sidik.models import SecretCandidate
+from sidik_ml._version import __version__
 from sidik_ml.explainability import _unwrap_estimator, explain_single_candidate
 from sidik_ml.features import FEATURE_SCHEMA_VERSION, FEATURE_NAMES, extract_feature_vector
 from sidik_ml.schemas import HybridFinding, MLPrediction, TriagePolicy
@@ -23,7 +24,7 @@ class HybridTriagePipeline:
         scanner: Optional[SecurityScanner] = None,
         classifier: Optional[ClassifierProtocol] = None,
         model_name: str = "deterministic_pass_through",
-        model_version: str = "0.5.5",
+        model_version: str = __version__,
         policy: Optional[TriagePolicy] = None,
     ):
         self.scanner = scanner or SecurityScanner(enable_dependency_scan=False, measure_memory=False)

@@ -1,7 +1,5 @@
 FROM python:3.11-slim
 
-ARG SIDIK_CORE_REF=v1.3.6
-
 LABEL org.opencontainers.image.source="https://github.com/radityobw/SIDIK-ML" \
       org.opencontainers.image.title="SIDIK-ML" \
       org.opencontainers.image.description="Explainable Classical Non-ANN Machine Learning Extension for SIDIK" \
@@ -16,7 +14,7 @@ WORKDIR /app
 COPY pyproject.toml README.md LICENSE ./
 COPY sidik_ml ./sidik_ml
 
-RUN pip install --no-cache-dir "https://github.com/radityobw/SIDIK/archive/refs/tags/${SIDIK_CORE_REF}.tar.gz" \
+RUN (pip install --no-cache-dir "sidik>=1.3.4,<2.0.0" || pip install --no-cache-dir "https://github.com/radityobw/SIDIK/archive/refs/heads/main.tar.gz") \
     && pip install --no-cache-dir . \
     && adduser --disabled-password --gecos "" sidik
 

@@ -5,6 +5,7 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 from sidik.models import ScanReport
+from sidik_ml._version import __version__
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.schemas import TriagePolicy
 from sidik_ml.serialization import get_ml_cache_dir, load_verified_skops_model
@@ -59,7 +60,7 @@ class SidikMLPlugin:
     """SIDIK ``sidik.plugins`` entry-point adapter running Non-ANN ML triage over secret findings."""
 
     name = "sidik-ml"
-    version = "0.5.5"
+    version = __version__
     description = "Explainable Non-ANN Machine Learning Triage Plugin for SIDIK"
 
     def __init__(self) -> None:

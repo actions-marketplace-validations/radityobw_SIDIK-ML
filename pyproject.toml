@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sidik-ml"
-version = "0.5.5"
+dynamic = ["version"]
 description = "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Static Security Analysis"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -73,6 +73,9 @@ include = ["sidik_ml*"]
 
 [tool.setuptools.package-data]
 "sidik_ml" = ["py.typed"]
+
+[tool.setuptools.dynamic]
+version = {attr = "sidik_ml._version.__version__"}
 
 [tool.pyrefly]
 search-path = [".", "../SIDIK"]
