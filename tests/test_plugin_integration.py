@@ -52,7 +52,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
         self.assertIsNotNone(plug, "sidik-ml entry point must be registered under sidik.plugins")
         self.assertIsInstance(plug, PostScanPlugin)
         self.assertEqual(plug.name, "sidik-ml")
-        self.assertEqual(plug.version, "0.5.2")
+        self.assertEqual(plug.version, "0.5.3")
 
     def test_unified_secret_plus_sca_with_critical_protection_and_tamper_guard(self):
         recs = _build_contract_fixture_records()
@@ -184,7 +184,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
                 with self.assertRaises(SystemExit) as ctx:
                     cli_main(["--version"])
             self.assertEqual(ctx.exception.code, 0)
-            self.assertIn("SIDIK-ML v0.5.2", buf.getvalue())
+            self.assertIn("SIDIK-ML v0.5.3", buf.getvalue())
 
             import tkinter as tk
             from sidik.gui import SecurityAnalyzerGUI
@@ -212,7 +212,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertTrue(hasattr(app_ml, "ml_edition_pill"))
             self.assertTrue(hasattr(app_ml, "chk_ml"))
             self.assertTrue(app_ml.var_ml_enabled.get())
-            self.assertIn("SIDIK-ML v0.5.2", ml_root.title())
+            self.assertIn("SIDIK-ML v0.5.3", ml_root.title())
         finally:
             ml_root.destroy()
 
@@ -276,7 +276,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             text=True,
             check=True,
         )
-        self.assertIn("SIDIK-ML v0.5.2", proc.stdout)
+        self.assertIn("SIDIK-ML v0.5.3", proc.stdout)
 
 
 if __name__ == "__main__":

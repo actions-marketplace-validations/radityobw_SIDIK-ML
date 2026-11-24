@@ -8,7 +8,7 @@
 *Explainable Classical Non-ANN Machine Learning Extension for False Positive Reduction in SIDIK Static Secret Detection*
 
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-3b82f6.svg)](#)
-[![Version v0.5.2](https://img.shields.io/badge/Version-v0.5.2-f59e0b.svg)](#)
+[![Version v0.5.3](https://img.shields.io/badge/Version-v0.5.3-f59e0b.svg)](#)
 [![Paradigm Non-ANN Only](https://img.shields.io/badge/Paradigm-Non--ANN%20Only-ea580c.svg)](#)
 [![Random Forest MCC 0.7692](https://img.shields.io/badge/RF%20F1-0.9636%20%7C%20MCC%200.7692-10b981.svg)](#)
 [![Unit Tests](https://img.shields.io/badge/Unit%20Tests-18%2F18%20Passing-22c55e.svg)](#)
@@ -22,7 +22,7 @@
 
 ## 📌 Ikhtisar Proyek & Filosofi Desain
 
-**SIDIK-ML** (`v0.5.2`) adalah paket perangkat lunak Python independen yang memperluas kemampuan pemindai deterministik [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.2`) dengan lapisan penyaringan *false positive* berbasis **klasifikasi klasik *Non-Artificial Neural Network* (*Non-ANN*) yang terjelaskan**.
+**SIDIK-ML** (`v0.5.3`) adalah paket perangkat lunak Python independen yang memperluas kemampuan pemindai deterministik [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.3`) dengan lapisan penyaringan *false positive* berbasis **klasifikasi klasik *Non-Artificial Neural Network* (*Non-ANN*) yang terjelaskan**.
 
 Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *deep neural network* berbobot ratusan megabita, `SIDIK-ML` bekerja sebagai *plugin* opsional melalui kontrak data aman `SecretCandidate` (`schema_version = "1.0.0"`) dan *entry point* standar `sidik.plugins`. Ketika dijalankan melalui `sidik-ml gui`, `sidik-ml interactive`, maupun `--enable-ml`, antarmuka menampilkan tema khusus **Amber Orange (`#f59e0b` / `#ea580c`)** lengkap dengan lencana `NON-ANN ML`, *prompt* `sidik-ml>`, serta dasbor HTML bernuansa kuning-oranye agar langsung terbedakan dari mode deterministik standar **Ocean Blue (`#3b82f6`)** milik `SIDIK`.
 
@@ -54,11 +54,11 @@ Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *d
 Kode Sumber & Manifes Target
            │
            ▼
-   SIDIK v1.3.2 Core (SAST 12 Aturan Regex + Entropi + Konteks + Offline OSV SCA)
+   SIDIK v1.3.3 Core (SAST 12 Aturan Regex + Entropi + Konteks + Offline OSV SCA)
            │
            ├──[Kontrak SecretCandidate v1.0.0 (masked_value + value_sha256)]──┐
            │                                                                   ▼
-           │                                                    SIDIK-ML v0.5.2 Plugin
+           │                                                    SIDIK-ML v0.5.3 Plugin
            │                                             (30 Fitur Statis -> skops + SHA-256
            │                                              -> Probabilitas + Explainability)
            │                                                                   │
@@ -98,7 +98,7 @@ SIDIK-ML/
 ├── .github/workflows/sidik-ml-ci.yml  # CI otomatis pytest, plugin discovery, & CLI
 ├── action.yml                         # Composite GitHub Action (SARIF & PR annotations)
 ├── sidik_ml/
-│   ├── __init__.py                    # Ekspor publik paket SIDIK-ML (v0.5.2)
+│   ├── __init__.py                    # Ekspor publik paket SIDIK-ML (v0.5.3)
 │   ├── __main__.py                    # Titik masuk modul (python -m sidik_ml)
 │   ├── cli.py                         # CLI scan, train, ekstrak fitur, TUI & GUI launchers
 │   ├── plugin.py                      # Adapter entry point sidik.plugins (SidikMLPlugin)
@@ -124,7 +124,7 @@ SIDIK-ML/
 
 ### 1. Instalasi & Aktivasi Lingkungan (*Virtual Environment*)
 
-`SIDIK-ML` menggunakan mesin inti, SCA OSV, CLI interaktif, serta GUI milik `SIDIK` (`sidik-security>=1.3.2`), sehingga keduanya harus dipasang di **lingkungan Python (`.venv`) yang sama**:
+`SIDIK-ML` menggunakan mesin inti, SCA OSV, CLI interaktif, serta GUI milik `SIDIK` (`sidik>=1.3.3`), sehingga keduanya harus dipasang di **lingkungan Python (`.venv`) yang sama**:
 
 ```bash
 # Dari direktori SIDIK-ML/ dengan venv SIDIK aktif
@@ -182,8 +182,8 @@ docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /worksp
 
 | Repositori | Peran Utama | Versi Terkini | Tautan |
 | :--- | :--- | :---: | :--- |
-| **SIDIK** | Mesin pemindai deterministik SAST & OSV SCA + host *plugin* UI | `v1.3.2` | [`github.com/radityobw/SIDIK`](https://github.com/radityobw/SIDIK) |
-| **SIDIK-ML** | Perangkat lunak ekstensi *Explainable Non-ANN ML* & *plugin* | `v0.5.2` | [`github.com/radityobw/SIDIK-ML`](https://github.com/radityobw/SIDIK-ML) |
+| **SIDIK** | Mesin pemindai deterministik SAST & OSV SCA + host *plugin* UI | `v1.3.3` | [`github.com/radityobw/SIDIK`](https://github.com/radityobw/SIDIK) |
+| **SIDIK-ML** | Perangkat lunak ekstensi *Explainable Non-ANN ML* & *plugin* | `v0.5.3` | [`github.com/radityobw/SIDIK-ML`](https://github.com/radityobw/SIDIK-ML) |
 
 ---
 
@@ -191,7 +191,7 @@ docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /worksp
 
 ## 📌 Project Overview
 
-**SIDIK-ML** (`v0.5.2`) is an independent Python package extending the deterministic [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.2`) security analyzer with **explainable classical Non-Artificial Neural Network (Non-ANN) machine learning** for false-positive reduction in hardcoded secret detection.
+**SIDIK-ML** (`v0.5.3`) is an independent Python package extending the deterministic [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.3`) security analyzer with **explainable classical Non-Artificial Neural Network (Non-ANN) machine learning** for false-positive reduction in hardcoded secret detection.
 
 Instead of forking SIDIK's UI or introducing heavy deep learning weights, `SIDIK-ML` integrates through the leak-safe `SecretCandidate` (`schema_version = "1.0.0"`) contract and the standard `sidik.plugins` entry-point group. When launched via `sidik-ml gui`, `sidik-ml interactive`, or `--enable-ml`, the shared UI switches cleanly into an **Amber Orange (`#f59e0b` / `#ea580c`)** identity with `NON-ANN ML` badges, amber-yellow `sidik-ml>` console prompts, and warm orange-themed HTML/Markdown triage dashboards, clearly distinguishing hybrid ML analysis from Core SIDIK's **Ocean Blue (`#3b82f6`)** deterministic edition.
 

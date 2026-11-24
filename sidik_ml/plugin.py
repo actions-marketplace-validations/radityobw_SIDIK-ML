@@ -53,7 +53,7 @@ class SidikMLPlugin:
     """SIDIK ``sidik.plugins`` entry-point adapter running Non-ANN ML triage over secret findings."""
 
     name = "sidik-ml"
-    version = "0.5.2"
+    version = "0.5.3"
     description = "Explainable Non-ANN Machine Learning Triage Plugin for SIDIK"
 
     def __init__(self) -> None:

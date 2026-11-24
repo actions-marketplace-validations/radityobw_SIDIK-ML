@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.5.3] - 2026-11-24
+- Updated Core dependency from `sidik-security` to **`sidik>=1.3.3,<2.0.0`** matching the PyPI `sidik` package name, and synced `action.yml`, `Dockerfile`, CI, and `release.yml` to `v1.3.3` / `v0.5.3`.
+
 ## [0.5.2] - 2026-11-24
 - Synced minimum Core dependency to `sidik-security>=1.3.2,<2.0.0` (including Marketplace-validated `SIDIK` `action.yml`, CI, and `Dockerfile` `SIDIK_CORE_REF=v1.3.2`).
 - Added [`Dockerfile`](Dockerfile), [`.dockerignore`](.dockerignore), and [`.github/workflows/release.yml`](.github/workflows/release.yml) for automated GitHub Release assets, `ghcr.io/radityobw/sidik-ml`, and gated PyPI Trusted Publishing.
