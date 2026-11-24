@@ -134,20 +134,21 @@ pip install -e "..\SIDIK[gui]"
 pip install -e .
 ```
 
-> **Catatan Windows PowerShell:** Apabila Anda membuka langsung folder `SIDIK\.venv\Scripts` tanpa menjalankan `Activate.ps1`, PowerShell tidak memuat perintah dari folder aktif secara otomatis. Gunakan awalan `.\` (misalnya `.\sidik-ml gui`, `.\sidik-ml interactive`, atau `.\sidik-ml-gui`), atau aktifkan *virtual environment* terlebih dahulu dengan `.\Activate.ps1`. Jika skrip aktivasi terblokir kebijakan eksekusi PowerShell, jalankan perintah lewat `python -m sidik_ml.cli ...`.
+> **Catatan Windows PowerShell:** Apabila Anda membuka langsung folder `SIDIK\.venv\Scripts` tanpa menjalankan `Activate.ps1`, PowerShell tidak memuat perintah dari folder aktif secara otomatis. Gunakan awalan `.\` (misalnya `.\sidik-ml -i`, `.\sidik-ml --gui`, `.\sidik -i`, atau `.\sidik --gui`), atau aktifkan *virtual environment* terlebih dahulu dengan `.\Activate.ps1`. Jika skrip aktivasi terblokir kebijakan eksekusi PowerShell, jalankan lewat `python -m sidik_ml ...` atau gunakan peluncur `run_sidik_ml.bat` / `run_sidik_ml_cli.bat`.
 
-### 2. Perintah Harian (CLI, TUI, GUI, & Pelatihan Model)
+### 2. Perintah Harian (Selaras `sidik` dan `sidik-ml`)
 
-Melalui *entry point* `sidik.plugins`, perintah `sidik-ml` dan `sidik` berbagi antarmuka CLI interaktif (TUI), *Desktop GUI*, serta 7 format laporan yang sama:
+Melalui *entry point* `sidik.plugins`, perintah `sidik-ml` dan `sidik` kini mendukung pola argumen yang simetris untuk TUI, *Desktop GUI*, pemindaian *one-shot*, modul `python -m`, serta 7 format laporan:
 
 ```bash
-# 1. Periksa versi atau luncurkan TUI / Desktop GUI bertema Electric Violet SIDIK-ML
+# 1. Periksa versi atau luncurkan TUI / Desktop GUI (simetris dengan sidik -i / sidik --gui)
 sidik-ml --version
-sidik-ml interactive
-sidik-ml gui
-sidik-ml-gui
+sidik-ml -i                  # atau: sidik-ml interactive / python -m sidik_ml -i / run_sidik_ml_cli.bat
+sidik-ml --gui               # atau: sidik-ml gui / sidik-ml-gui / python -m sidik_ml --gui / run_sidik_ml.bat
 
-# 2. Pindai terpadu (Secret + OSV SCA) dengan ekspor laporan HTML / SARIF / Markdown
+# 2. Pindai langsung (argumen posisional / --target / scan) dengan ekspor HTML / SARIF / Markdown
+sidik-ml .
+sidik-ml --target path/to/project --include-deps --model model.skops --format html -o hasil_ml.html
 sidik-ml scan path/to/project --include-deps --model model.skops --format html -o hasil_ml.html
 
 # 3. Pindai dengan output ringkas konsol / JSON (tanpa supresi default)
@@ -219,20 +220,21 @@ On 25 external Python repositories (`1,193` `.py` files), the CV-selected model 
 pip install -e "..\SIDIK[gui]"
 pip install -e .
 
-# Check version and launch Electric Violet SIDIK-ML Interactive CLI (TUI) or Desktop GUI
+# Check version and launch Electric Violet SIDIK-ML Interactive CLI (TUI) or Desktop GUI (symmetric with sidik)
 sidik-ml --version
-sidik-ml interactive --lang en
-sidik-ml gui
-sidik-ml-gui
+sidik-ml -i --lang en          # or: sidik-ml interactive / python -m sidik_ml -i / run_sidik_ml_cli.bat
+sidik-ml --gui                 # or: sidik-ml gui / sidik-ml-gui / python -m sidik_ml --gui / run_sidik_ml.bat
 
-# Run unified Secret + SCA scan with HTML / SARIF report export
+# Run unified Secret + SCA scan (positional path, --target/-t, or `scan`)
+sidik-ml .
+sidik-ml --target path/to/project --include-deps --model model.skops --format html -o ml_report.html --lang en
 sidik-ml scan path/to/project --include-deps --model model.skops --format html -o ml_report.html --lang en
 
 # Run tests
 pytest tests -v
 ```
 
-> **Windows PowerShell Note:** When running executables directly inside `SIDIK\.venv\Scripts` without activating `.venv` first, prefix commands with `.\` (e.g., `.\sidik-ml gui`, `.\sidik-ml interactive`) or invoke via `python -m sidik_ml.cli ...`.
+> **Windows PowerShell Note:** When running executables directly inside `SIDIK\.venv\Scripts` without activating `.venv` first, prefix commands with `.\` (e.g., `.\sidik-ml -i`, `.\sidik-ml --gui`) or invoke via `python -m sidik_ml ...` (or `run_sidik_ml.bat` / `run_sidik_ml_cli.bat`).
 
 ## 📄 License
 

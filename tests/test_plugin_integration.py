@@ -211,6 +211,68 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
         finally:
             root.destroy()
 
+    def test_cli_symmetric_shorthands_and_module_entrypoint(self):
+        import subprocess
+        import sys
+
+        with patch("sidik.cli.run_interactive_cli", return_value=0) as mock_tui:
+            for argv in (["-i", "--lang", "en"], ["--interactive"], ["--cli"]):
+                mock_tui.reset_mock()
+                rc = cli_main(argv)
+                self.assertEqual(rc, 0)
+                mock_tui.assert_called_once()
+                _, kwargs = mock_tui.call_args
+                self.assertTrue(kwargs["enable_ml_plugin"])
+                self.assertEqual(kwargs["banner_title"], "SIDIK-ML")
+
+        with patch("sidik.gui.main") as mock_gui:
+            rc_gui1 = cli_main(["--gui", "--suppress-fp"])
+            self.assertEqual(rc_gui1, 0)
+            mock_gui.assert_called_once()
+            _, kwargs1 = mock_gui.call_args
+            self.assertTrue(kwargs1["enable_ml"])
+            self.assertTrue(kwargs1["ml_suppress_fp"])
+            self.assertEqual(kwargs1["app_brand"], "SIDIK-ML")
+
+            mock_gui.reset_mock()
+            rc_gui2 = cli_main(["--gui", "--ml-threshold", "0.7"])
+            self.assertEqual(rc_gui2, 0)
+            mock_gui.assert_called_once()
+            _, kwargs2 = mock_gui.call_args
+            self.assertTrue(kwargs2["enable_ml"])
+            self.assertAlmostEqual(kwargs2["ml_threshold"], 0.7)
+            self.assertEqual(kwargs2["app_brand"], "SIDIK-ML")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            proj_dir = os.path.join(tmp, "proj")
+            os.makedirs(proj_dir)
+            with open(os.path.join(proj_dir, "app.py"), "w", encoding="utf-8") as f:
+                f.write("aws_key = 'AKIAJ2M4K8P9Q3R7W5T1'\n")
+            with open(os.path.join(proj_dir, "requirements.txt"), "w", encoding="utf-8") as f:
+                f.write("requests==2.19.0\n")
+
+            out_json = os.path.join(tmp, "out1.json")
+            rc1 = cli_main([proj_dir, "--format", "json", "-o", out_json])
+            self.assertEqual(rc1, 0)
+            with open(out_json, "r", encoding="utf-8") as fh:
+                doc1 = json.load(fh)
+            self.assertEqual(doc1["summary"]["total_secrets_found"], 1)
+
+            out_json2 = os.path.join(tmp, "out2.json")
+            rc2 = cli_main(["-t", proj_dir, "--include-deps", "--format", "json", "-o", out_json2])
+            self.assertEqual(rc2, 0)
+            with open(out_json2, "r", encoding="utf-8") as fh:
+                doc2 = json.load(fh)
+            self.assertGreaterEqual(doc2["summary"]["total_vulnerabilities_found"], 1)
+
+        proc = subprocess.run(
+            [sys.executable, "-m", "sidik_ml", "--version"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn("SIDIK-ML v0.5.0", proc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

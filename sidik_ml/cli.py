@@ -18,10 +18,96 @@ from sidik_ml.serialization import load_verified_skops_model, verify_artifact_sh
 from sidik_ml.training import train_and_compare_models
 
 
+KNOWN_SUBCOMMANDS = {
+    "scan",
+    "interactive",
+    "cli",
+    "tui",
+    "gui",
+    "extract-features",
+    "verify-model",
+    "train",
+}
+
+
+def _normalize_argv(raw_argv: List[str]) -> List[str]:
+    """Normalizes symmetric SIDIK-style shorthands (`-i`, `--gui`, `.`, `-t`) into subcommands."""
+    if not raw_argv:
+        return []
+    head = raw_argv[0]
+    if head in KNOWN_SUBCOMMANDS or head in ("-v", "--version"):
+        return list(raw_argv)
+
+    interactive_flags = {"-i", "--interactive", "--cli"}
+    if any(tok in interactive_flags for tok in raw_argv):
+        rest = [tok for tok in raw_argv if tok not in interactive_flags]
+        return ["interactive", *rest]
+
+    if "--gui" in raw_argv:
+        rest = [tok for tok in raw_argv if tok != "--gui"]
+        return ["gui", *rest]
+
+    if head in ("-h", "--help"):
+        return list(raw_argv)
+
+    if (not head.startswith("-")) or ("-t" in raw_argv or "--target" in raw_argv):
+        return ["scan", *raw_argv]
+
+    return list(raw_argv)
+
+
+def _add_shared_ml_args(subparser: argparse.ArgumentParser) -> None:
+    """Registers symmetric `--model/--ml-model`, `--sha256/--ml-sha256`, `--threshold`, and `--suppress-fp` flags."""
+    subparser.add_argument(
+        "--model", "--ml-model",
+        dest="model",
+        default=None,
+        help="Optional path to verified .skops model artifact",
+    )
+    subparser.add_argument(
+        "--sha256", "--ml-sha256",
+        dest="sha256",
+        default=None,
+        help="Optional expected SHA-256 checksum (auto-reads <model>.manifest.json if omitted)",
+    )
+    subparser.add_argument(
+        "--threshold", "--ml-threshold",
+        dest="threshold",
+        type=float,
+        default=0.5,
+        help="Probability threshold for ML triage (default: 0.5)",
+    )
+    subparser.add_argument(
+        "--suppress-fp", "--ml-suppress-fp",
+        dest="suppress_fp",
+        action="store_true",
+        help="Suppress non-CRITICAL findings classified as false positives",
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sidik-ml",
         description="SIDIK-ML: Explainable Non-ANN ML Extension for SIDIK Static Security Analysis",
+        epilog=(
+            "Examples (symmetric with SIDIK):\n"
+            "  sidik-ml -i                                        # Launch Electric Violet Interactive Console (TUI)\n"
+            "  sidik-ml --gui                                     # Launch SIDIK-ML Desktop GUI (alias: sidik-ml gui)\n"
+            "  sidik-ml .                                         # Scan current directory with ML triage\n"
+            "  sidik-ml --target . --include-deps --format html   # Full Secret + SCA HTML dashboard\n"
+            "  sidik-ml train data.jsonl -o artifacts/ --stratified"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--interactive", "-i", "--cli",
+        action="store_true",
+        help="Launch interactive CLI console window (TUI) with SIDIK-ML active",
+    )
+    parser.add_argument(
+        "--gui",
+        action="store_true",
+        help="Launch SIDIK-ML Desktop GUI",
     )
     parser.add_argument(
         "--version",
@@ -29,18 +115,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="version",
         version=f"SIDIK-ML v{ML_VERSION} (Explainable Non-ANN ML Extension | Core SIDIK v{SIDIK_VERSION})",
     )
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command", required=False)
 
     p_scan = sub.add_parser("scan", help="Scan a path via SIDIK and apply verified ML triage & optional SCA")
-    p_scan.add_argument("target", help="File or directory path to scan")
-    p_scan.add_argument("--model", default=None, help="Path to verified .skops model artifact")
-    p_scan.add_argument("--sha256", default=None, help="Expected SHA-256 checksum (auto-reads <model>.manifest.json if omitted)")
-    p_scan.add_argument("--threshold", type=float, default=0.5, help="Probability threshold (default: 0.5)")
-    p_scan.add_argument(
-        "--suppress-fp",
-        action="store_true",
-        help="Hide non-CRITICAL findings classified as false positives (default keeps all)",
-    )
+    p_scan.add_argument("target", nargs="?", default=None, help="File or directory path to scan")
+    p_scan.add_argument("--target", "-t", dest="target_opt", default=None, help="File or directory path to scan")
+    _add_shared_ml_args(p_scan)
     p_scan.add_argument(
         "--include-deps",
         action="store_true",
@@ -58,16 +138,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_tui = sub.add_parser("interactive", aliases=["cli", "tui"], help="Launch SIDIK Interactive CLI Console with SIDIK-ML plugin active")
     p_tui.add_argument("--lang", choices=["id", "en"], default="id", help="Initial console language (default: id)")
-    p_tui.add_argument("--model", default=None, help="Optional path to verified .skops model artifact")
-    p_tui.add_argument("--sha256", default=None, help="Optional expected SHA-256 checksum")
-    p_tui.add_argument("--threshold", type=float, default=0.5, help="Probability threshold (default: 0.5)")
-    p_tui.add_argument("--suppress-fp", action="store_true", help="Suppress non-CRITICAL false positives by default")
+    _add_shared_ml_args(p_tui)
 
     p_gui = sub.add_parser("gui", help="Launch SIDIK Desktop GUI with SIDIK-ML plugin pre-enabled")
-    p_gui.add_argument("--model", default=None, help="Optional path to verified .skops model artifact")
-    p_gui.add_argument("--sha256", default=None, help="Optional expected SHA-256 checksum")
-    p_gui.add_argument("--threshold", type=float, default=0.5, help="Probability threshold (default: 0.5)")
-    p_gui.add_argument("--suppress-fp", action="store_true", help="Suppress non-CRITICAL false positives by default")
+    _add_shared_ml_args(p_gui)
 
     p_feat = sub.add_parser("extract-features", help="Export leakage-free feature JSONL from target candidates")
     p_feat.add_argument("target", help="File or directory path to inspect")
@@ -105,35 +179,40 @@ def _render_report_text(report, fmt: str, lang: str) -> str:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    if argv is None and len(sys.argv) == 1 and sys.stdin.isatty() and sys.stdout.isatty():
-        argv = ["interactive"]
+    raw_argv = list(sys.argv[1:]) if argv is None else list(argv)
+    if not raw_argv and argv is None and sys.stdin.isatty() and sys.stdout.isatty():
+        raw_argv = ["interactive"]
 
     parser = build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args(_normalize_argv(raw_argv))
 
-    if args.command in ("interactive", "cli", "tui"):
+    if args.command in ("interactive", "cli", "tui") or (args.command is None and args.interactive):
         from sidik.cli import run_interactive_cli
         return run_interactive_cli(
-            initial_lang=args.lang,
+            initial_lang=getattr(args, "lang", "id"),
             enable_ml_plugin=True,
-            ml_model_path=args.model,
-            ml_sha256=args.sha256,
-            ml_threshold=args.threshold,
-            ml_suppress_fp=args.suppress_fp,
+            ml_model_path=getattr(args, "model", None),
+            ml_sha256=getattr(args, "sha256", None),
+            ml_threshold=getattr(args, "threshold", 0.5),
+            ml_suppress_fp=getattr(args, "suppress_fp", False),
             banner_title="SIDIK-ML",
         )
 
-    if args.command == "gui":
+    if args.command == "gui" or (args.command is None and args.gui):
         from sidik.gui import main as sidik_gui_main
         sidik_gui_main(
             enable_ml=True,
-            ml_model_path=args.model,
-            ml_sha256=args.sha256,
-            ml_threshold=args.threshold,
-            ml_suppress_fp=args.suppress_fp,
+            ml_model_path=getattr(args, "model", None),
+            ml_sha256=getattr(args, "sha256", None),
+            ml_threshold=getattr(args, "threshold", 0.5),
+            ml_suppress_fp=getattr(args, "suppress_fp", False),
             app_brand="SIDIK-ML",
         )
         return 0
+
+    if args.command is None:
+        parser.print_help()
+        return 2
 
     if args.command == "train":
         records = load_jsonl_dataset(args.dataset)
@@ -172,6 +251,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"Exported {len(cands)} candidate feature rows to {args.output}")
         return 0
 
+    scan_target = args.target_opt or args.target
+    if not scan_target:
+        parser.error("Target path is required (e.g., 'sidik-ml .' or 'sidik-ml scan <path>' or 'sidik-ml -i')")
+
     resolved_sha: Optional[str] = args.sha256
     if args.model:
         try:
@@ -196,7 +279,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "suppress_false_positives": args.suppress_fp,
             },
         )
-        scan_report = scanner.scan_path(args.target)
+        scan_report = scanner.scan_path(scan_target)
         out_text = _render_report_text(scan_report, fmt=fmt, lang=args.lang)
         if args.output:
             out_dir = os.path.dirname(os.path.abspath(args.output))
@@ -223,7 +306,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             suppress_false_positives=args.suppress_fp,
         ),
     )
-    findings = pipeline.scan_path(args.target, include_filtered=True)
+    findings = pipeline.scan_path(scan_target, include_filtered=True)
     if args.json:
         print(json.dumps([f.to_dict() for f in findings], indent=2))
     else:
@@ -235,10 +318,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 def launch_gui(argv: Optional[List[str]] = None) -> int:
     """Dedicated entry point for ``sidik-ml-gui`` wrapping SIDIK's desktop GUI."""
     parser = argparse.ArgumentParser(prog="sidik-ml-gui", description="Launch SIDIK-ML Desktop GUI")
-    parser.add_argument("--model", default=None, help="Optional path to verified .skops model artifact")
-    parser.add_argument("--sha256", default=None, help="Optional expected SHA-256 checksum")
-    parser.add_argument("--threshold", type=float, default=0.5, help="Probability threshold (default: 0.5)")
-    parser.add_argument("--suppress-fp", action="store_true", help="Suppress non-CRITICAL false positives by default")
+    _add_shared_ml_args(parser)
     args = parser.parse_args(argv)
     return main([
         "gui",
