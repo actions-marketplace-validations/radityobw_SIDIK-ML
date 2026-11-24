@@ -113,6 +113,9 @@ SIDIK-ML/
 │   ├── training.py                    # Pipeline pelatihan reproduksibel & provenans JSON
 │   └── integration.py                 # HybridTriagePipeline (SIDIK + opsional ML classifier)
 ├── notebooks/
+│   ├── data/
+│   │   ├── creddata_features.jsonl    # Korpus fitur statis bebas leakage (Apache-2.0 CredData)
+│   │   └── README.md                  # Dokumentasi privasi & statistik korpus notebook
 │   └── quickstart.ipynb               # Interactive Jupyter / Google Colab quickstart notebook
 ├── tests/                             # Unit & integration tests (pytest)
 ├── pyproject.toml                     # Konfigurasi paket, dependencies, & entry points
