@@ -171,6 +171,9 @@ sidik-ml train dataset.jsonl --output-dir artifacts/ --stratified
 
 # 8. Jalankan seluruh 18 unit & integration tests
 pytest tests -v
+
+# 9. Atau jalankan lewat GitHub Container Registry (ghcr.io) tanpa setup Python
+docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /workspace --include-deps
 ```
 
 ---
@@ -232,6 +235,9 @@ sidik-ml scan path/to/project --include-deps --model model.skops --format html -
 
 # Run tests
 pytest tests -v
+
+# Run via GitHub Container Registry (ghcr.io) or install .whl from GitHub Releases
+docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /workspace --include-deps
 ```
 
 > **Windows PowerShell Note:** When running executables directly inside `SIDIK\.venv\Scripts` without activating `.venv` first, prefix commands with `.\` (e.g., `.\sidik-ml -i`, `.\sidik-ml --gui`) or invoke via `python -m sidik_ml ...` (or `run_sidik_ml.bat` / `run_sidik_ml_cli.bat`).
