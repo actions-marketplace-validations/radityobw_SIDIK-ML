@@ -30,12 +30,14 @@ from sidik_ml.serialization import (
     verify_artifact_sha256,
     save_verified_skops_model,
     load_verified_skops_model,
+    get_ml_cache_dir,
+    fetch_verified_model,
 )
 from sidik_ml.training import collect_provenance, train_and_compare_models
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.plugin import SidikMLPlugin, create_plugin, resolve_model_and_sha256
 
-__version__ = "0.5.3"
+__version__ = "0.5.4"
 
 __all__ = [
     "__version__",
@@ -76,6 +78,8 @@ __all__ = [
     "verify_artifact_sha256",
     "save_verified_skops_model",
     "load_verified_skops_model",
+    "get_ml_cache_dir",
+    "fetch_verified_model",
     "collect_provenance",
     "train_and_compare_models",
     "HybridTriagePipeline",

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sidik-ml"
-version = "0.5.3"
+version = "0.5.4"
 description = "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Static Security Analysis"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -19,14 +19,32 @@ authors = [
     {name = "Mohamad Hilman"}
 ]
 keywords = ["security", "sast", "secret-detection", "machine-learning", "explainable-ai", "non-neural"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
 dependencies = [
-    "sidik>=1.3.3,<2.0.0",
+    "sidik>=1.3.4,<2.0.0",
     "scikit-learn>=1.4.0",
     "scipy>=1.11.0",
     "skops>=0.9.0",
 ]
 
 [project.optional-dependencies]
+gui = [
+    "sidik[gui]>=1.3.4,<2.0.0",
+]
 train = [
     "numpy>=1.26.0",
     "pandas>=2.1.0",
@@ -50,11 +68,16 @@ sidik-ml = "sidik_ml.plugin:create_plugin"
 [project.urls]
 Homepage = "https://github.com/radityobw/SIDIK-ML"
 Repository = "https://github.com/radityobw/SIDIK-ML"
+Issues = "https://github.com/radityobw/SIDIK-ML/issues"
+Changelog = "https://github.com/radityobw/SIDIK-ML/blob/main/CHANGELOG.md"
 Upstream = "https://github.com/radityobw/SIDIK"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["sidik_ml*"]
+
+[tool.setuptools.package-data]
+"sidik_ml" = ["py.typed"]
 
 [tool.pyrefly]
 search-path = [".", "../SIDIK"]

@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Tuple
 from sidik.models import ScanReport
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.schemas import TriagePolicy
-from sidik_ml.serialization import load_verified_skops_model
+from sidik_ml.serialization import get_ml_cache_dir, load_verified_skops_model
 
 
 def resolve_model_and_sha256(model_path: str, sha256: Optional[str] = None) -> Tuple[str, str]:
@@ -37,6 +37,12 @@ def discover_default_model() -> Optional[Tuple[str, str]]:
     if env_path:
         candidates.append(env_path.strip())
 
+    models_cache_dir = os.path.join(get_ml_cache_dir(), "models")
+    if os.path.isdir(models_cache_dir):
+        for fname in sorted(os.listdir(models_cache_dir)):
+            if fname.endswith(".skops"):
+                candidates.append(os.path.join(models_cache_dir, fname))
+
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     candidates.append(os.path.join(repo_root, "artifacts", "gradient_boosting.skops"))
 
@@ -53,7 +59,7 @@ class SidikMLPlugin:
     """SIDIK ``sidik.plugins`` entry-point adapter running Non-ANN ML triage over secret findings."""
 
     name = "sidik-ml"
-    version = "0.5.3"
+    version = "0.5.4"
     description = "Explainable Non-ANN Machine Learning Triage Plugin for SIDIK"
 
     def __init__(self) -> None:
@@ -100,7 +106,17 @@ class SidikMLPlugin:
             policy=policy,
         )
 
-        candidates = scanner.extract_secret_candidates(target_path, include_filtered=candidate_wide)
+        preextracted = opts.get("_preextracted_candidates")
+        if isinstance(preextracted, list):
+            if candidate_wide:
+                candidates = preextracted
+            else:
+                candidates = [
+                    c for c in preextracted
+                    if bool(c.deterministic_decision.get("passed_deterministic_filter"))
+                ]
+        else:
+            candidates = scanner.extract_secret_candidates(target_path, include_filtered=candidate_wide)
         hybrid_findings = pipeline.triage_candidates(candidates)
         by_id = {hf.candidate_id: hf for hf in hybrid_findings}
 

@@ -52,7 +52,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
         self.assertIsNotNone(plug, "sidik-ml entry point must be registered under sidik.plugins")
         self.assertIsInstance(plug, PostScanPlugin)
         self.assertEqual(plug.name, "sidik-ml")
-        self.assertEqual(plug.version, "0.5.3")
+        self.assertEqual(plug.version, "0.5.4")
 
     def test_unified_secret_plus_sca_with_critical_protection_and_tamper_guard(self):
         recs = _build_contract_fixture_records()
@@ -148,7 +148,21 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
                 "--output",
                 out_html,
             ])
-            self.assertEqual(rc, 0)
+            self.assertEqual(rc, 1)
+            rc_allow = cli_main([
+                "scan",
+                proj_dir,
+                "--include-deps",
+                "--model",
+                m_path,
+                "--fail-on",
+                "none",
+                "--format",
+                "html",
+                "--output",
+                out_html,
+            ])
+            self.assertEqual(rc_allow, 0)
             self.assertTrue(os.path.isfile(out_html))
             with open(out_html, "r", encoding="utf-8") as fh:
                 html_content = fh.read()
@@ -184,7 +198,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
                 with self.assertRaises(SystemExit) as ctx:
                     cli_main(["--version"])
             self.assertEqual(ctx.exception.code, 0)
-            self.assertIn("SIDIK-ML v0.5.3", buf.getvalue())
+            self.assertIn("SIDIK-ML v0.5.4", buf.getvalue())
 
             import tkinter as tk
             from sidik.gui import SecurityAnalyzerGUI
@@ -212,7 +226,7 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertTrue(hasattr(app_ml, "ml_edition_pill"))
             self.assertTrue(hasattr(app_ml, "chk_ml"))
             self.assertTrue(app_ml.var_ml_enabled.get())
-            self.assertIn("SIDIK-ML v0.5.3", ml_root.title())
+            self.assertIn("SIDIK-ML v0.5.4", ml_root.title())
         finally:
             ml_root.destroy()
 
@@ -258,13 +272,13 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
 
             out_json = os.path.join(tmp, "out1.json")
             rc1 = cli_main([proj_dir, "--format", "json", "-o", out_json])
-            self.assertEqual(rc1, 0)
+            self.assertEqual(rc1, 1)
             with open(out_json, "r", encoding="utf-8") as fh:
                 doc1 = json.load(fh)
             self.assertEqual(doc1["summary"]["total_secrets_found"], 1)
 
             out_json2 = os.path.join(tmp, "out2.json")
-            rc2 = cli_main(["-t", proj_dir, "--include-deps", "--format", "json", "-o", out_json2])
+            rc2 = cli_main(["-t", proj_dir, "--include-deps", "--fail-on", "none", "--format", "json", "-o", out_json2])
             self.assertEqual(rc2, 0)
             with open(out_json2, "r", encoding="utf-8") as fh:
                 doc2 = json.load(fh)
@@ -276,7 +290,90 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             text=True,
             check=True,
         )
-        self.assertIn("SIDIK-ML v0.5.3", proc.stdout)
+        self.assertIn("SIDIK-ML v0.5.4", proc.stdout)
+
+    def test_v054_cli_parity_single_pass_skew_and_fetch_model(self):
+        import hashlib
+        import io
+        import warnings
+        from contextlib import redirect_stderr, redirect_stdout
+
+        # 1. Missing target path returns exit code 2 with stderr error
+        err_buf = io.StringIO()
+        with redirect_stderr(err_buf):
+            rc_missing = cli_main(["nonexistent_target_dir_v054"])
+        self.assertEqual(rc_missing, 2)
+        self.assertIn("does not exist", err_buf.getvalue())
+
+        # 2. Clean repo returns 0 with non-empty output and pass-through notice on stderr
+        with tempfile.TemporaryDirectory() as tmp:
+            clean_dir = os.path.join(tmp, "clean_proj")
+            os.makedirs(clean_dir)
+            with open(os.path.join(clean_dir, "app.py"), "w", encoding="utf-8") as f:
+                f.write("print('ok')\n")
+            out_buf = io.StringIO()
+            err_buf2 = io.StringIO()
+            with patch("sidik_ml.cli.discover_default_model", return_value=None):
+                with redirect_stdout(out_buf), redirect_stderr(err_buf2):
+                    rc_clean = cli_main([clean_dir, "--format", "compact"])
+            self.assertEqual(rc_clean, 0)
+            self.assertIn("Clean!", out_buf.getvalue())
+            self.assertIn("pass-through mode", err_buf2.getvalue())
+
+            # 3. Single-pass plugin reuses _preextracted_candidates (does not re-scan files)
+            dirty_dir = os.path.join(tmp, "dirty_proj")
+            os.makedirs(dirty_dir)
+            with open(os.path.join(dirty_dir, "app.py"), "w", encoding="utf-8") as f:
+                f.write("aws_key = 'AKIAJ2M4K8P9Q3R7W5T1'\n")
+            plugin = SidikMLPlugin()
+            scanner = SecurityScanner(enable_dependency_scan=False, post_scan_plugins=[plugin])
+            with patch.object(scanner, "extract_secret_candidates", side_effect=AssertionError("Must reuse pre-extracted candidates")):
+                rep = scanner.scan_path(dirty_dir)
+            self.assertEqual(len(rep.findings), 1)
+            self.assertIn("ml_triage", rep.findings[0].metadata)
+
+            # 4. sklearn_version recorded in manifest and mismatch triggers RuntimeWarning
+            recs = _build_contract_fixture_records()
+            X, y, _ = records_to_matrix(recs)
+            clf = create_non_ann_model("logistic_regression", random_state=42)
+            clf.fit(X, y)
+            m_path = os.path.join(tmp, "skew_test.skops")
+            manifest = save_verified_skops_model(clf, m_path)
+            self.assertIn("sklearn_version", manifest["metadata"])
+            manifest["metadata"]["sklearn_version"] = "0.0.1"
+            with open(f"{m_path}.manifest.json", "w", encoding="utf-8") as mf:
+                json.dump(manifest, mf)
+            from sidik_ml.serialization import fetch_verified_model, load_verified_skops_model
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                load_verified_skops_model(m_path, manifest["sha256"])
+            self.assertTrue(any("scikit-learn 0.0.1" in str(w.message) for w in caught))
+
+            # 5. fetch_verified_model rejects non-HTTPS & SHA mismatch, accepts matching HTTPS payload
+            with self.assertRaises(ValueError):
+                fetch_verified_model("http://example.com/m.skops", "a" * 64)
+            fake_bytes = open(m_path, "rb").read()
+            fake_sha = hashlib.sha256(fake_bytes).hexdigest()
+
+            class _FakeResp:
+                def __init__(self, data: bytes) -> None:
+                    self._data = data
+                def read(self, _n: int = -1) -> bytes:
+                    return self._data
+                def __enter__(self):
+                    return self
+                def __exit__(self, *args):
+                    return False
+
+            with patch("urllib.request.urlopen", return_value=_FakeResp(fake_bytes)):
+                dest, got_sha = fetch_verified_model(
+                    "https://example.com/releases/model.skops",
+                    fake_sha,
+                    output_path=os.path.join(tmp, "fetched", "model.skops"),
+                )
+            self.assertEqual(got_sha, fake_sha)
+            self.assertTrue(os.path.isfile(dest))
+            self.assertTrue(os.path.isfile(f"{dest}.manifest.json"))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4] - 2026-11-25
+- Updated minimum Core dependency to **`sidik>=1.3.4,<2.0.0`** (with `action.yml`, `Dockerfile`, CI, and `release.yml` synced to `v1.3.4` / `v0.5.4`) and merged [`action.yml`](action.yml) into a single scan pass (`--format github --sarif-output ...`).
+- **Full CLI & CI/CD Parity (`sidik_ml/cli.py`):** Defaults to Amber-Orange `console` output (SAST + SCA), `--fail-on any` exit code enforcement (`1` on findings, `2` on missing target path), explicit `stderr` pass-through notice when no `.skops` model is loaded, `[tool.sidik]` config loading, `--severity`, `--mode`, `--baseline`, `--write-baseline`, `--sarif-output`, `--extensions`, `--exclude`, `--no-color`, `--quiet`, `--no-step-summary`, and `$GITHUB_STEP_SUMMARY` integration.
+- **Single-Pass Plugin Execution (`sidik_ml/plugin.py`):** Reuses `_preextracted_candidates` provided by `SecurityScanner` (`sidik>=1.3.4`) to avoid scanning files twice.
+- **Model Verification, Cache & Version-Skew Guard (`sidik_ml/serialization.py`):** Added `get_ml_cache_dir()`, `fetch_verified_model()` (plus `sidik-ml fetch-model` subcommand) downloading HTTPS artifacts into user cache after SHA-256 verification, and `sklearn_version` recording in `.manifest.json` with `RuntimeWarning` skew detection.
+- **Packaging & Typing:** Added `gui` optional extra (`sidik[gui]>=1.3.4,<2.0.0`), PEP 561 `sidik_ml/py.typed` in wheel `package-data`, PyPI `classifiers`, and absolute GitHub links in `README.md`.
+
 ## [0.5.3] - 2026-11-24
 - Updated Core dependency from `sidik-security` to **`sidik>=1.3.3,<2.0.0`** matching the PyPI `sidik` package name, and synced `action.yml`, `Dockerfile`, CI, and `release.yml` to `v1.3.3` / `v0.5.3`.
 

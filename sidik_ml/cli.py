@@ -7,14 +7,23 @@ import sys
 from typing import List, Optional
 
 from sidik import SecurityScanner, __version__ as SIDIK_VERSION
+from sidik.cli import (
+    _safe_launch_gui,
+    apply_baseline_filter,
+    apply_severity_filter,
+    evaluate_fail_on_threshold,
+    write_baseline_file,
+    write_github_step_summary,
+)
+from sidik.core import load_pyproject_sidik_config
 from sidik.reporting.formatter import ReportFormatter
 from sidik_ml import __version__ as ML_VERSION
 from sidik_ml.dataset import load_jsonl_dataset
 from sidik_ml.features import extract_feature_dict
 from sidik_ml.integration import HybridTriagePipeline
-from sidik_ml.plugin import SidikMLPlugin, resolve_model_and_sha256
+from sidik_ml.plugin import SidikMLPlugin, discover_default_model, resolve_model_and_sha256
 from sidik_ml.schemas import TriagePolicy
-from sidik_ml.serialization import load_verified_skops_model, verify_artifact_sha256
+from sidik_ml.serialization import fetch_verified_model, load_verified_skops_model, verify_artifact_sha256
 from sidik_ml.training import train_and_compare_models
 
 
@@ -27,6 +36,7 @@ KNOWN_SUBCOMMANDS = {
     "extract-features",
     "verify-model",
     "train",
+    "fetch-model",
 }
 
 
@@ -122,19 +132,48 @@ def build_parser() -> argparse.ArgumentParser:
     p_scan.add_argument("--target", "-t", dest="target_opt", default=None, help="File or directory path to scan")
     _add_shared_ml_args(p_scan)
     p_scan.add_argument(
+        "--mode", "-m",
+        choices=["all", "secret", "secrets", "dep", "deps", "dependency", "dependencies"],
+        default=None,
+        help="Scan mode: all (default), secret (secret scan only), or dep/dependency (dependency scan only)",
+    )
+    p_scan.add_argument("--secret-only", action="store_true", help="Perform secret detection scan only")
+    p_scan.add_argument("--dep-only", action="store_true", help="Perform dependency vulnerability scan only")
+    p_scan.add_argument(
         "--include-deps",
         action="store_true",
-        help="Also inspect Python dependency manifests against offline OSV advisories",
+        help="Include Python dependency manifest scanning (enabled by default in 'all' mode)",
     )
     p_scan.add_argument(
         "--format", "-f",
-        choices=["compact", "console", "json", "markdown", "csv", "html", "sarif", "github"],
-        default="compact",
-        help="Report format (compact preserves single-line ML triage; others use SIDIK ReportFormatter)",
+        choices=["console", "compact", "json", "markdown", "csv", "html", "sarif", "github"],
+        default="console",
+        help="Report format (default: console Amber-Orange dashboard summary)",
     )
     p_scan.add_argument("--output", "-o", default=None, help="Optional output file path for report")
+    p_scan.add_argument("--sarif-output", default=None, help="Optional secondary SARIF v2.1.0 output file path")
     p_scan.add_argument("--lang", choices=["id", "en"], default="id", help="Report language (default: id)")
-    p_scan.add_argument("--json", action="store_true", help="Emit JSON output (equivalent to --format json in compact mode)")
+    p_scan.add_argument("--json", action="store_true", help="Emit JSON output")
+    p_scan.add_argument(
+        "--severity", "-s",
+        choices=["low", "medium", "high", "critical"],
+        default=None,
+        help="Filter reported findings by minimum severity level",
+    )
+    p_scan.add_argument(
+        "--fail-on",
+        choices=["none", "any", "low", "medium", "high", "critical"],
+        default=None,
+        help="Exit code 1 threshold: none, any, low, medium, high, or critical (default: any)",
+    )
+    p_scan.add_argument("--no-color", action="store_true", help="Disable ANSI color codes in terminal output")
+    p_scan.add_argument("--quiet", "-q", action="store_true", help="Suppress progress and informational notices")
+    p_scan.add_argument("--no-step-summary", action="store_true", help="Do not append Markdown summary to $GITHUB_STEP_SUMMARY")
+    p_scan.add_argument("--extensions", default=None, help="Comma-separated extensions for secret scanning")
+    p_scan.add_argument("--exclude", action="append", default=[], help="Glob pattern to exclude (repeatable)")
+    p_scan.add_argument("--baseline", default=None, help="Path to JSON baseline file of suppressed finding IDs")
+    p_scan.add_argument("--write-baseline", default=None, help="Write current finding IDs to JSON baseline file")
+    p_scan.add_argument("--db", default=None, help="Optional path to custom vulnerability database JSON file")
 
     p_tui = sub.add_parser("interactive", aliases=["cli", "tui"], help="Launch SIDIK Interactive CLI Console with SIDIK-ML plugin active")
     p_tui.add_argument("--lang", choices=["id", "en"], default="id", help="Initial console language (default: id)")
@@ -159,10 +198,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_train.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
     p_train.add_argument("--bootstrap", type=int, default=300, help="Bootstrap resamples for 95%% CI (default: 300)")
 
+    p_fetch = sub.add_parser("fetch-model", help="Download and SHA-256 verify a remote .skops model into user cache")
+    p_fetch.add_argument("url", help="HTTPS URL to the .skops model artifact")
+    p_fetch.add_argument("--sha256", required=True, help="Expected SHA-256 hex digest of the artifact")
+    p_fetch.add_argument("--output", "-o", default=None, help="Optional destination .skops path")
+
     return parser
 
 
-def _render_report_text(report, fmt: str, lang: str) -> str:
+def _render_report_text(report, fmt: str, lang: str, use_color: Optional[bool] = None) -> str:
     if fmt == "json":
         return ReportFormatter.to_json(report)
     if fmt == "markdown":
@@ -175,7 +219,7 @@ def _render_report_text(report, fmt: str, lang: str) -> str:
         return ReportFormatter.to_sarif(report)
     if fmt == "github":
         return ReportFormatter.to_github_annotations(report, lang=lang)
-    return ReportFormatter.to_console_summary(report, lang=lang)
+    return ReportFormatter.to_console_summary(report, lang=lang, use_color=use_color)
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -199,8 +243,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
 
     if args.command == "gui" or (args.command is None and args.gui):
-        from sidik.gui import main as sidik_gui_main
-        sidik_gui_main(
+        return _safe_launch_gui(
             enable_ml=True,
             ml_model_path=getattr(args, "model", None),
             ml_sha256=getattr(args, "sha256", None),
@@ -208,11 +251,20 @@ def main(argv: Optional[List[str]] = None) -> int:
             ml_suppress_fp=getattr(args, "suppress_fp", False),
             app_brand="SIDIK-ML",
         )
-        return 0
 
     if args.command is None:
         parser.print_help()
         return 2
+
+    if args.command == "fetch-model":
+        try:
+            dest, digest = fetch_verified_model(args.url, args.sha256, output_path=args.output)
+        except Exception as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 2
+        print(f"Verified model saved to: {dest}")
+        print(f"SHA-256: {digest}")
+        return 0
 
     if args.command == "train":
         records = load_jsonl_dataset(args.dataset)
@@ -255,64 +307,150 @@ def main(argv: Optional[List[str]] = None) -> int:
     if not scan_target:
         parser.error("Target path is required (e.g., 'sidik-ml .' or 'sidik-ml scan <path>' or 'sidik-ml -i')")
 
+    if not os.path.exists(scan_target):
+        print(f"Error: Target path '{scan_target}' does not exist.", file=sys.stderr)
+        return 2
+
+    model_path_arg = args.model
     resolved_sha: Optional[str] = args.sha256
-    if args.model:
+    if model_path_arg:
         try:
-            _, resolved_sha = resolve_model_and_sha256(args.model, args.sha256)
+            _, resolved_sha = resolve_model_and_sha256(model_path_arg, args.sha256)
         except ValueError as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 2
-
-    use_full_formatter = (args.format != "compact") or bool(args.include_deps) or bool(args.output)
-    if use_full_formatter:
-        fmt = "json" if (args.format == "compact" and args.json) else ("console" if args.format == "compact" else args.format)
-        plugin = SidikMLPlugin()
-        scanner = SecurityScanner(
-            enable_secret_scan=True,
-            enable_dependency_scan=bool(args.include_deps),
-            measure_memory=True,
-            post_scan_plugins=[plugin],
-            plugin_options={
-                "model_path": args.model,
-                "sha256": resolved_sha,
-                "threshold": args.threshold,
-                "suppress_false_positives": args.suppress_fp,
-            },
-        )
-        scan_report = scanner.scan_path(scan_target)
-        out_text = _render_report_text(scan_report, fmt=fmt, lang=args.lang)
-        if args.output:
-            out_dir = os.path.dirname(os.path.abspath(args.output))
-            if out_dir:
-                os.makedirs(out_dir, exist_ok=True)
-            with open(args.output, "w", encoding="utf-8") as f:
-                f.write(out_text)
-            print(f"Report written to {args.output}")
-        else:
-            print(out_text)
-        return 0
-
-    classifier = None
-    model_name = "deterministic_pass_through"
-    if args.model and resolved_sha:
-        classifier = load_verified_skops_model(args.model, resolved_sha)
-        model_name = args.model
-
-    pipeline = HybridTriagePipeline(
-        classifier=classifier,
-        model_name=model_name,
-        policy=TriagePolicy(
-            decision_threshold=args.threshold,
-            suppress_false_positives=args.suppress_fp,
-        ),
-    )
-    findings = pipeline.scan_path(scan_target, include_filtered=True)
-    if args.json:
-        print(json.dumps([f.to_dict() for f in findings], indent=2))
     else:
-        for f in findings:
-            print(f"[{f.severity}] {f.final_action} p={f.ml_prediction.secret_probability:.2f} {f.file_path}:{f.line_number} {f.masked_value}")
-    return 0
+        discovered = discover_default_model()
+        if discovered is not None:
+            model_path_arg, resolved_sha = discovered
+
+    if not model_path_arg and not args.quiet:
+        print(
+            "[SIDIK-ML Notice] Running in deterministic pass-through mode (no .skops model loaded). "
+            "Supply --model <path.skops> or run 'sidik-ml fetch-model' / 'sidik-ml train' to enable Non-ANN ML scoring.",
+            file=sys.stderr,
+        )
+
+    cfg_base = scan_target if os.path.isdir(scan_target) else os.path.dirname(os.path.abspath(scan_target))
+    proj_cfg = load_pyproject_sidik_config(cfg_base)
+
+    ext_spec = args.extensions or (
+        ",".join(proj_cfg["extensions"]) if isinstance(proj_cfg.get("extensions"), list) else proj_cfg.get("extensions")
+    )
+    parsed_extensions = None
+    if isinstance(ext_spec, str) and ext_spec.strip():
+        parsed_extensions = tuple(
+            e.strip() if e.strip().startswith(".") else f".{e.strip()}"
+            for e in ext_spec.split(",")
+            if e.strip()
+        )
+
+    eff_severity = args.severity or (str(proj_cfg["severity"]) if proj_cfg.get("severity") else None)
+    eff_baseline = args.baseline or (str(proj_cfg["baseline"]) if proj_cfg.get("baseline") else None)
+    fail_on = (args.fail_on or str(proj_cfg.get("fail_on", "any"))).lower()
+
+    if args.format == "compact" and not args.include_deps and args.mode is None and not args.output and not args.sarif_output and not args.write_baseline:
+        classifier = None
+        model_name = "deterministic_pass_through"
+        if model_path_arg and resolved_sha:
+            classifier = load_verified_skops_model(model_path_arg, resolved_sha)
+            model_name = model_path_arg
+
+        compact_scanner = SecurityScanner(
+            enable_dependency_scan=False,
+            custom_vulnerability_db=args.db,
+            ignore_patterns=list(args.exclude) if args.exclude else None,
+            secret_extensions=parsed_extensions,
+            measure_memory=False,
+        )
+        pipeline = HybridTriagePipeline(
+            scanner=compact_scanner,
+            classifier=classifier,
+            model_name=model_name,
+            policy=TriagePolicy(
+                decision_threshold=args.threshold,
+                suppress_false_positives=args.suppress_fp,
+            ),
+        )
+        findings = pipeline.scan_path(scan_target, include_filtered=True)
+        if eff_severity:
+            sev_order = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
+            min_r = sev_order.get(eff_severity.lower(), 1)
+            findings = [f for f in findings if sev_order.get(f.severity.lower(), 0) >= min_r]
+
+        if args.json:
+            print(json.dumps([f.to_dict() for f in findings], indent=2))
+        elif findings:
+            for f in findings:
+                print(f"[{f.severity}] {f.final_action} p={f.ml_prediction.secret_probability:.2f} {f.file_path}:{f.line_number} {f.masked_value}")
+        else:
+            print("[OK] SIDIK-ML: Clean! 0 findings detected.")
+
+        active_alerts = [f for f in findings if not f.suppressed_by_ml]
+        if fail_on == "none":
+            return 0
+        if fail_on == "any":
+            return 1 if active_alerts else 0
+        sev_order = {"info": 0, "low": 1, "medium": 2, "high": 3, "critical": 4}
+        th_r = sev_order.get(fail_on, 1)
+        return 1 if any(sev_order.get(f.severity.lower(), 0) >= th_r for f in active_alerts) else 0
+
+    mode_val = (args.mode or str(proj_cfg.get("mode", "all"))).lower()
+    is_secret_only = args.secret_only or mode_val in ("secret", "secrets")
+    is_dep_only = args.dep_only or mode_val in ("dep", "deps", "dependency", "dependencies")
+    fmt = "json" if args.json else ("console" if args.format == "compact" else args.format)
+
+    plugin = SidikMLPlugin()
+    scanner = SecurityScanner(
+        enable_secret_scan=not is_dep_only,
+        enable_dependency_scan=(not is_secret_only) or bool(args.include_deps),
+        custom_vulnerability_db=args.db,
+        ignore_patterns=list(args.exclude) if args.exclude else None,
+        secret_extensions=parsed_extensions,
+        measure_memory=True,
+        post_scan_plugins=[plugin],
+        plugin_options={
+            "model_path": model_path_arg,
+            "sha256": resolved_sha,
+            "threshold": args.threshold,
+            "suppress_false_positives": args.suppress_fp,
+        },
+    )
+    scan_report = scanner.scan_path(scan_target)
+    apply_severity_filter(scan_report, eff_severity)
+    apply_baseline_filter(scan_report, eff_baseline)
+
+    if args.write_baseline:
+        write_baseline_file(scan_report, args.write_baseline)
+        if not args.quiet:
+            print(f"Baseline written ({len(scan_report.findings)} findings): {args.write_baseline}", file=sys.stderr)
+
+    if args.sarif_output:
+        sarif_dir = os.path.dirname(os.path.abspath(args.sarif_output))
+        if sarif_dir:
+            os.makedirs(sarif_dir, exist_ok=True)
+        with open(args.sarif_output, "w", encoding="utf-8") as sf:
+            sf.write(ReportFormatter.to_sarif(scan_report))
+
+    out_text = _render_report_text(
+        scan_report,
+        fmt=fmt,
+        lang=args.lang,
+        use_color=(False if args.no_color else None),
+    )
+    if args.output:
+        out_dir = os.path.dirname(os.path.abspath(args.output))
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(out_text)
+        if not args.quiet:
+            print(f"Report written to {args.output}")
+    else:
+        print(out_text)
+
+    write_github_step_summary(scan_report, lang=args.lang, disable=args.no_step_summary)
+    return evaluate_fail_on_threshold(scan_report.findings, fail_on)
 
 
 def launch_gui(argv: Optional[List[str]] = None) -> int:
