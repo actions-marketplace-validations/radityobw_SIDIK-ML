@@ -11,7 +11,9 @@ from sidik_ml.dataset import (
     iter_repository_group_folds,
     load_jsonl_dataset,
     repository_grouped_split,
+    resolve_cross_repo_value_duplicates,
     save_jsonl_dataset,
+    stratified_repository_split,
 )
 from sidik_ml.features import FEATURE_NAMES
 
@@ -78,6 +80,27 @@ class TestDatasetAndLeakage(unittest.TestCase):
         self.assertEqual(len(folds), 3)
         for _, f_tr, f_va in folds:
             assert_no_leakage(f_tr, f_va)
+
+    def test_cross_repo_value_dedup_and_stratified_split(self):
+        records = [
+            _make_record("c1", "repoA", "same_hash", "k = 'v1'", 1),
+            _make_record("c2", "repoB", "same_hash", "k = 'v1'", 1),
+            _make_record("c3", "repoA", "conflict_h", "k = 'v2'", 1),
+            _make_record("c4", "repoC", "conflict_h", "k = 'v2'", 0),
+        ]
+        resolved, stats = resolve_cross_repo_value_duplicates(records)
+        self.assertEqual(stats["cross_repo_value_deduped"], 1)
+        self.assertEqual(stats["conflicting_label_dropped"], 2)
+        self.assertEqual(len(resolved), 1)
+
+        rich = []
+        for idx in range(10):
+            r = f"s_repo_{idx}"
+            rich.append(_make_record(f"p_{idx}", r, f"hp_{idx}", f"prod={idx}", 1))
+            rich.append(_make_record(f"n_{idx}", r, f"hn_{idx}", f"test={idx}", 0))
+        tr, te = stratified_repository_split(rich, n_splits=5, test_fold=0)
+        assert_no_leakage(tr, te)
+        self.assertTrue(any(r.label == 1 for r in te) and any(r.label == 0 for r in te))
 
 
 if __name__ == "__main__":

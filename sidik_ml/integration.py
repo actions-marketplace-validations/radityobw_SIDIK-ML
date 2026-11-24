@@ -3,6 +3,7 @@
 from typing import Dict, List, Optional, Protocol, Sequence
 from sidik.core import SecurityScanner
 from sidik.models import SecretCandidate
+from sidik_ml.explainability import _unwrap_estimator, explain_single_candidate
 from sidik_ml.features import FEATURE_SCHEMA_VERSION, FEATURE_NAMES, extract_feature_vector
 from sidik_ml.schemas import HybridFinding, MLPrediction, TriagePolicy
 
@@ -63,12 +64,29 @@ class HybridTriagePipeline:
                 suppressed = True
                 action = "SUPPRESSED_FP"
 
-            top_feats: Dict[str, float] = {
-                "shannon_entropy": vec[FEATURE_NAMES.index("shannon_entropy")],
-                "is_test_path": vec[FEATURE_NAMES.index("is_test_path")],
-                "is_placeholder_or_mock": vec[FEATURE_NAMES.index("is_placeholder_or_mock")],
-                "has_positive_keyword": vec[FEATURE_NAMES.index("has_positive_keyword")],
-            }
+            if self.classifier is not None:
+                est = _unwrap_estimator(self.classifier)
+                if hasattr(est, "coef_") or hasattr(est, "feature_importances_"):
+                    top_feats = explain_single_candidate(
+                        self.classifier,
+                        vec,
+                        feature_names=FEATURE_NAMES,
+                        top_k=5,
+                    )
+                else:
+                    top_feats = {
+                        "shannon_entropy": vec[FEATURE_NAMES.index("shannon_entropy")],
+                        "is_test_path": vec[FEATURE_NAMES.index("is_test_path")],
+                        "is_placeholder_or_mock": vec[FEATURE_NAMES.index("is_placeholder_or_mock")],
+                        "has_positive_keyword": vec[FEATURE_NAMES.index("has_positive_keyword")],
+                    }
+            else:
+                top_feats = {
+                    "shannon_entropy": vec[FEATURE_NAMES.index("shannon_entropy")],
+                    "is_test_path": vec[FEATURE_NAMES.index("is_test_path")],
+                    "is_placeholder_or_mock": vec[FEATURE_NAMES.index("is_placeholder_or_mock")],
+                    "has_positive_keyword": vec[FEATURE_NAMES.index("has_positive_keyword")],
+                }
 
             ml_pred = MLPrediction(
                 candidate_id=cand.candidate_id,

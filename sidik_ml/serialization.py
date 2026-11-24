@@ -7,6 +7,9 @@ import os
 from typing import Any, Dict, List, Optional
 
 
+SAFE_SKOPS_TYPE_PREFIXES = ("sklearn.", "numpy.", "scipy.", "builtins.", "collections.")
+
+
 def compute_file_sha256(file_path: str) -> str:
     """Computes SHA-256 hex digest of an artifact file."""
     hasher = hashlib.sha256()
@@ -75,5 +78,15 @@ def load_verified_skops_model(
             "skops is required for safe offline model loading. Install with: pip install 'sidik-ml[train]'"
         ) from exc
 
-    allowed = trusted_types if trusted_types is not None else sio.get_untrusted_types(file=model_path)
+    if trusted_types is not None:
+        allowed = trusted_types
+    else:
+        untrusted = sio.get_untrusted_types(file=model_path)
+        rejected = [
+            t for t in untrusted
+            if not any(t.startswith(prefix) for prefix in SAFE_SKOPS_TYPE_PREFIXES)
+        ]
+        if rejected:
+            raise ValueError(f"Refusing to load untrusted skops type(s): {rejected}")
+        allowed = untrusted
     return sio.load(model_path, trusted=allowed)

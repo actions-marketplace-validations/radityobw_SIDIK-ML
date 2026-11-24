@@ -2,16 +2,16 @@
 
 **Ekstensi *Machine Learning* *Non-Neural* yang Dapat Dijelaskan (*Explainable Non-ANN ML*) untuk Reduksi *False Positive* pada Deteksi *Hardcoded Secret* SIDIK**
 
-`SIDIK-ML` adalah paket perangkat lunak Python independen (`v0.2.0`) yang mengonsumsi [`sidik-security`](https://github.com/radityobw/SIDIK) (`>=1.1.0,<2.0.0`) melalui kontrak data berversi `SecretCandidate` (`schema_version = "1.0.0"`).
+`SIDIK-ML` adalah paket perangkat lunak Python independen (`v0.3.0`) yang mengonsumsi [`sidik-security`](https://github.com/radityobw/SIDIK) (`>=1.1.0,<2.0.0`) melalui kontrak data berversi `SecretCandidate` (`schema_version = "1.0.0"`).
 
 ---
 
 ## Batasan Ruang Lingkup & Prinsip Desain
 
 1. **Klasifikasi Klasik / *Non-ANN* Eksklusif:** Hanya mengizinkan model *Non-ANN* terstruktur (`logistic_regression`, `decision_tree`, `random_forest`, `extra_trees`, `gradient_boosting`) dengan validasi penolak arsitektur *neural* (`validate_non_ann_model_name()`).
-2. **Pencegahan *Data Leakage* & Privasi:** Ekstraksi `30` fitur statis murni bebas *target leakage* (`extract_feature_dict`), deduplikasi sebelum pemisahan, dan `assert_no_leakage()` yang menjamin nol tumpang-tindih `repo_id` maupun `value_sha256`. Nilai rahasia mentah tidak pernah disimpan.
-3. **Kebijakan *Triage* Aman (`TriagePolicy`):** Secara *default* (`suppress_false_positives=False`), seluruh temuan deterministik `SIDIK` tetap dipertahankan bersama skor probabilitas ML dan penjelasan fitur; temuan `CRITICAL` dilindungi agar tidak dibungkam diam-diam (`never_suppress_severities=("CRITICAL",)`).
-4. **Deserialisasi Luring Aman:** Artefak model memakai format `skops` disertai verifikasi *checksum SHA-256* sebelum pemuatan (tanpa `pickle`/`joblib` mentah).
+2. **Pencegahan *Data Leakage* & Privasi:** Ekstraksi `30` fitur statis murni bebas *target leakage* (`extract_feature_dict`), deduplikasi konteks dan *cross-repository value hash* (`resolve_cross_repo_value_duplicates()`), serta `assert_no_leakage()` yang menjamin nol tumpang-tindih `repo_id` maupun `value_sha256` lintas *split*. Nilai rahasia mentah tidak pernah disimpan.
+3. **Kebijakan *Triage* Aman (`TriagePolicy`):** Secara *default* (`suppress_false_positives=False`), seluruh temuan deterministik `SIDIK` tetap dipertahankan bersama skor probabilitas ML dan penjelasan fitur berbasis bobot model aktif (`explain_single_candidate()`); temuan `CRITICAL` dilindungi agar tidak dibungkam diam-diam (`never_suppress_severities=("CRITICAL",)`).
+4. **Deserialisasi Luring Aman:** Artefak model memakai format `skops` disertai verifikasi *checksum SHA-256* dan pemeriksaan *allowlist* prefiks tipe aman (`SAFE_SKOPS_TYPE_PREFIXES`) sebelum pemuatan (tanpa `pickle`/`joblib` mentah).
 
 ---
 
@@ -21,7 +21,7 @@
 SIDIK-ML/
 ├── sidik_ml/
 │   ├── __init__.py
-│   ├── cli.py             # Antarmuka CLI (`sidik-ml scan`, `extract-features`, `verify-model`)
+│   ├── cli.py             # Antarmuka CLI (`sidik-ml scan`, `extract-features`, `verify-model`, `train`)
 │   ├── schemas.py         # MLPrediction, HybridFinding, TriagePolicy
 │   ├── features.py        # 30 fitur statis bebas target leakage dari SecretCandidate
 │   ├── models.py          # 5 model Non-ANN & neural exclusion guard
@@ -54,4 +54,7 @@ sidik-ml extract-features path/to/project --output candidates.jsonl --repo-id my
 
 # Verifikasi integritas checksum SHA-256 artefak model .skops
 sidik-ml verify-model model.skops --sha256 <hex_digest>
+
+# Latih & bandingkan 5 model Non-ANN menggunakan StratifiedGroupKFold
+sidik-ml train dataset.jsonl --output-dir artifacts/ --stratified
 ```

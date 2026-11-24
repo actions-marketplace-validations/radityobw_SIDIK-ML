@@ -92,6 +92,43 @@ def deduplicate_records(
     return unique, removed
 
 
+def resolve_cross_repo_value_duplicates(
+    records: List[LabeledCandidateRecord],
+) -> Tuple[List[LabeledCandidateRecord], Dict[str, int]]:
+    """Enforces zero cross-repository value_sha256 overlap and drops conflicting-label hashes."""
+    ordered = sorted(records, key=lambda r: (r.repo_id, r.file_path, r.candidate_id))
+    grouped: Dict[str, List[LabeledCandidateRecord]] = {}
+    nohash_records: List[LabeledCandidateRecord] = []
+
+    for rec in ordered:
+        h = rec.value_sha256.strip().lower()
+        if not h:
+            nohash_records.append(rec)
+            continue
+        grouped.setdefault(h, []).append(rec)
+
+    resolved: List[LabeledCandidateRecord] = list(nohash_records)
+    cross_repo_deduped = 0
+    conflicting_dropped = 0
+
+    for h in sorted(grouped):
+        grp = grouped[h]
+        distinct_labels = {int(r.label) for r in grp}
+        if len(distinct_labels) > 1:
+            conflicting_dropped += len(grp)
+            continue
+        resolved.append(grp[0])
+        cross_repo_deduped += len(grp) - 1
+
+    stats = {
+        "input_records": len(records),
+        "output_records": len(resolved),
+        "cross_repo_value_deduped": cross_repo_deduped,
+        "conflicting_label_dropped": conflicting_dropped,
+    }
+    return resolved, stats
+
+
 def assert_no_leakage(
     train_records: List[LabeledCandidateRecord],
     test_records: List[LabeledCandidateRecord],
@@ -133,6 +170,35 @@ def repository_grouped_split(
     test_records = [records[int(i)] for i in test_idx]
     assert_no_leakage(train_records, test_records)
     return train_records, test_records
+
+
+def stratified_repository_split(
+    records: List[LabeledCandidateRecord],
+    n_splits: int = 5,
+    test_fold: int = 0,
+) -> Tuple[List[LabeledCandidateRecord], List[LabeledCandidateRecord]]:
+    """Splits records into stratified train and held-out test folds grouped strictly by repo_id."""
+    if n_splits < 2:
+        raise ValueError("n_splits must be at least 2.")
+    if not (0 <= test_fold < n_splits):
+        raise ValueError(f"test_fold must satisfy 0 <= test_fold < {n_splits}.")
+    groups = [r.repo_id or r.candidate_id for r in records]
+    unique_groups = set(groups)
+    if len(unique_groups) < n_splits:
+        raise ValueError(
+            f"At least {n_splits} distinct repo_id groups are required for {n_splits}-fold stratified repo split."
+        )
+
+    labels = [r.label for r in records]
+    cv = StratifiedGroupKFold(n_splits=n_splits)
+    for fold_idx, (tr_idx, te_idx) in enumerate(cv.split(records, labels, groups=groups)):
+        if fold_idx == test_fold:
+            train_records = [records[int(i)] for i in tr_idx]
+            test_records = [records[int(i)] for i in te_idx]
+            assert_no_leakage(train_records, test_records)
+            return train_records, test_records
+
+    raise ValueError(f"Unable to select fold {test_fold} from {n_splits}-fold StratifiedGroupKFold.")
 
 
 def iter_repository_group_folds(

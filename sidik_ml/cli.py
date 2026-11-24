@@ -6,10 +6,12 @@ import sys
 from typing import List, Optional
 
 from sidik import SecurityScanner
+from sidik_ml.dataset import load_jsonl_dataset
 from sidik_ml.features import extract_feature_dict
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.schemas import TriagePolicy
 from sidik_ml.serialization import load_verified_skops_model, verify_artifact_sha256
+from sidik_ml.training import train_and_compare_models
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,12 +42,32 @@ def build_parser() -> argparse.ArgumentParser:
     p_ver.add_argument("model_path", help="Path to .skops artifact")
     p_ver.add_argument("--sha256", required=True, help="Expected SHA-256 hex digest")
 
+    p_train = sub.add_parser("train", help="Train and evaluate classical Non-ANN models on a labeled JSONL dataset")
+    p_train.add_argument("dataset", help="Path to labeled JSONL dataset")
+    p_train.add_argument("--output-dir", "-o", required=True, help="Directory for model artifact, manifest, and report")
+    p_train.add_argument("--stratified", action="store_true", help="Use StratifiedGroupKFold split and CV selection")
+    p_train.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
+    p_train.add_argument("--bootstrap", type=int, default=300, help="Bootstrap resamples for 95%% CI (default: 300)")
+
     return parser
 
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.command == "train":
+        records = load_jsonl_dataset(args.dataset)
+        report = train_and_compare_models(
+            records,
+            random_state=args.seed,
+            output_dir=args.output_dir,
+            dataset_path=args.dataset,
+            use_stratified_split=args.stratified,
+            n_bootstrap=args.bootstrap,
+        )
+        print(json.dumps({"best_model": report["best_model"], "saved_artifact": report["saved_artifact"]}, indent=2))
+        return 0
 
     if args.command == "verify-model":
         ok = verify_artifact_sha256(args.model_path, args.sha256)

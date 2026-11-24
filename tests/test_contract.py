@@ -67,6 +67,38 @@ class TestSidikMLContract(unittest.TestCase):
             payload = json.dumps([r.to_dict() for r in results])
             self.assertNotIn(raw_secret, payload)
 
+    def test_hybrid_pipeline_real_model_explainability(self):
+        from sidik_ml.dataset import LabeledCandidateRecord, records_to_matrix
+        from sidik_ml.models import create_non_ann_model
+
+        recs = []
+        for idx in range(6):
+            for lbl in (1, 0):
+                feats = {n: 0.0 for n in FEATURE_NAMES}
+                feats["shannon_entropy"] = 4.4 if lbl == 1 else 2.0
+                feats["is_test_path"] = 0.0 if lbl == 1 else 1.0
+                recs.append(LabeledCandidateRecord(
+                    candidate_id=f"c_{idx}_{lbl}",
+                    repo_id=f"r_{idx}",
+                    file_path="app.py",
+                    value_sha256=f"h_{idx}_{lbl}",
+                    masked_context="x",
+                    label=lbl,
+                    features=feats,
+                ))
+        X, y, _ = records_to_matrix(recs)
+        rf = create_non_ann_model("random_forest", random_state=42)
+        rf.fit(X, y)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            sample = os.path.join(tmp, "app.py")
+            with open(sample, "w", encoding="utf-8") as f:
+                f.write("AWS_ACCESS_KEY_ID = 'AKIAJ2M4K8P9Q3R7W5T1'\n")
+            pipeline = HybridTriagePipeline(classifier=rf, model_name="random_forest")
+            results = pipeline.scan_path(tmp, include_filtered=True)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(len(results[0].ml_prediction.top_feature_contributions), 5)
+
     def test_feature_vector_alignment_and_schema(self):
         with tempfile.TemporaryDirectory() as tmp:
             fp = os.path.join(tmp, "app.py")

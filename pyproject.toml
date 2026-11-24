@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sidik-ml"
-version = "0.2.0"
+version = "0.3.0"
 description = "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Static Security Analysis"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -50,3 +50,6 @@ Upstream = "https://github.com/radityobw/SIDIK"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["sidik_ml*"]
+
+[tool.pyrefly]
+search-path = [".", "../SIDIK"]

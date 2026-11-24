@@ -1,9 +1,11 @@
 """Tests for Non-ANN model guard, training/comparison, statistical tests, explainability, and skops I/O."""
 
+import json
 import os
 import tempfile
 import tracemalloc
 import unittest
+from unittest.mock import patch
 
 from sidik_ml.dataset import LabeledCandidateRecord, records_to_matrix
 from sidik_ml.evaluation import (
@@ -61,18 +63,26 @@ class TestModelsAndTraining(unittest.TestCase):
     def test_skops_save_load_verification(self):
         recs = _build_contract_fixture_records()
         X, y, _ = records_to_matrix(recs)
-        clf = create_non_ann_model("random_forest", random_state=42)
-        clf.fit(X, y)
-
         with tempfile.TemporaryDirectory() as tmp:
-            m_path = os.path.join(tmp, "rf.skops")
-            manifest = save_verified_skops_model(clf, m_path, metadata={"model": "random_forest"})
-            loaded = load_verified_skops_model(m_path, manifest["sha256"])
-            preds = loaded.predict(X[:2])
-            self.assertEqual(len(preds), 2)
+            for model_name in SUPPORTED_MODELS:
+                clf = create_non_ann_model(model_name, random_state=42)
+                clf.fit(X, y)
+                m_path = os.path.join(tmp, f"{model_name}.skops")
+                manifest = save_verified_skops_model(clf, m_path, metadata={"model": model_name})
+                loaded = load_verified_skops_model(m_path, manifest["sha256"])
+                preds = loaded.predict(X[:2])
+                self.assertEqual(len(preds), 2)
+
+            rf_path = os.path.join(tmp, "random_forest.skops")
+            with open(rf_path + ".manifest.json", "r", encoding="utf-8") as mf:
+                rf_sha = json.load(mf)["sha256"]
 
             with self.assertRaises(ValueError):
-                load_verified_skops_model(m_path, "f" * 64)
+                load_verified_skops_model(rf_path, "f" * 64)
+
+            with patch("skops.io.get_untrusted_types", return_value=["os.system"]):
+                with self.assertRaises(ValueError):
+                    load_verified_skops_model(rf_path, rf_sha)
 
     def test_training_comparison_explainability_and_ablation(self):
         recs = _build_contract_fixture_records()
@@ -100,6 +110,23 @@ class TestModelsAndTraining(unittest.TestCase):
             ablation = run_feature_group_ablation("logistic_regression", recs[:12], recs[12:])
             self.assertIn("all_features", ablation)
             self.assertIn("without_lexical_context", ablation)
+
+    def test_stratified_training_and_cli_train(self):
+        from sidik_ml.cli import main as cli_main
+        from sidik_ml.dataset import save_jsonl_dataset
+
+        recs = _build_contract_fixture_records()
+        with tempfile.TemporaryDirectory() as tmp:
+            ds_path = os.path.join(tmp, "dataset.jsonl")
+            out_dir = os.path.join(tmp, "out")
+            save_jsonl_dataset(recs, ds_path)
+            rc = cli_main(["train", ds_path, "--output-dir", out_dir, "--stratified", "--seed", "42", "--bootstrap", "20"])
+            self.assertEqual(rc, 0)
+            self.assertTrue(os.path.isfile(os.path.join(out_dir, "experiment_report.json")))
+            with open(os.path.join(out_dir, "experiment_report.json"), "r", encoding="utf-8") as f:
+                rpt = json.load(f)
+            self.assertIn("cv_summary", rpt["models"][rpt["best_model"]])
+            self.assertIsNotNone(rpt["models"][rpt["best_model"]]["cv_summary"])
 
     def test_metrics_stats_and_non_intrusive_profiling(self):
         y_t = [1, 1, 0, 0, 1, 0]

@@ -8,8 +8,10 @@ from sidik_ml.dataset import (
     load_jsonl_dataset,
     save_jsonl_dataset,
     deduplicate_records,
+    resolve_cross_repo_value_duplicates,
     assert_no_leakage,
     repository_grouped_split,
+    stratified_repository_split,
     iter_repository_group_folds,
     records_to_matrix,
 )
@@ -23,6 +25,7 @@ from sidik_ml.evaluation import (
 )
 from sidik_ml.explainability import extract_global_explanations, explain_single_candidate
 from sidik_ml.serialization import (
+    SAFE_SKOPS_TYPE_PREFIXES,
     compute_file_sha256,
     verify_artifact_sha256,
     save_verified_skops_model,
@@ -31,7 +34,7 @@ from sidik_ml.serialization import (
 from sidik_ml.training import collect_provenance, train_and_compare_models
 from sidik_ml.integration import HybridTriagePipeline
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "__version__",
@@ -51,8 +54,10 @@ __all__ = [
     "load_jsonl_dataset",
     "save_jsonl_dataset",
     "deduplicate_records",
+    "resolve_cross_repo_value_duplicates",
     "assert_no_leakage",
     "repository_grouped_split",
+    "stratified_repository_split",
     "iter_repository_group_folds",
     "records_to_matrix",
     "compute_classification_metrics",
@@ -62,6 +67,7 @@ __all__ = [
     "run_feature_group_ablation",
     "extract_global_explanations",
     "explain_single_candidate",
+    "SAFE_SKOPS_TYPE_PREFIXES",
     "compute_file_sha256",
     "verify_artifact_sha256",
     "save_verified_skops_model",
