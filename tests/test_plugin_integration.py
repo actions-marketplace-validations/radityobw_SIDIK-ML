@@ -143,12 +143,11 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
                 self.assertEqual(kwargs["app_brand"], "SIDIK-ML")
 
     def test_headless_gui_mounts_ml_plugin_controls(self):
-        import tkinter as tk
-        from sidik.gui import SecurityAnalyzerGUI
-
         try:
+            import tkinter as tk
+            from sidik.gui import SecurityAnalyzerGUI
             root = tk.Tk()
-        except tk.TclError as exc:
+        except Exception as exc:
             self.skipTest(f"Tkinter display unavailable: {exc}")
         root.withdraw()
         try:

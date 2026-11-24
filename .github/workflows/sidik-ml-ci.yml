@@ -20,12 +20,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install SIDIK >=1.1.0 and SIDIK-ML Dependencies
+      - name: Install SIDIK >=1.2.0 and SIDIK-ML Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "git+https://github.com/radityobw/SIDIK.git@v1.1.0"
+          pip install "git+https://github.com/radityobw/SIDIK.git@v1.2.0"
           pip install -e ".[dev]"
 
       - name: Run Unit and Contract Tests
         run: |
           pytest tests -v
+
+      - name: Verify Plugin Discovery and CLI Entrypoints
+        run: |
+          sidik --list-plugins
+          sidik-ml --help
+          sidik-ml-gui --help
