@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sidik-ml"
 dynamic = ["version"]
-description = "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Static Security Analysis"
+description = "SIDIK-ML: Explainable Non-Neural ML Extension for SIDIK Polyglot SAST & Multi-Ecosystem SCA"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
@@ -62,6 +62,7 @@ sidik-ml = "sidik_ml.plugin:create_plugin"
 
 [project.urls]
 Homepage = "https://github.com/radityobw/SIDIK-ML"
+Documentation = "https://radityobw.github.io/SIDIK-ML/"
 Repository = "https://github.com/radityobw/SIDIK-ML"
 Issues = "https://github.com/radityobw/SIDIK-ML/issues"
 Changelog = "https://github.com/radityobw/SIDIK-ML/blob/main/CHANGELOG.md"

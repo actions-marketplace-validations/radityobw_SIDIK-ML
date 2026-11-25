@@ -12,6 +12,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/radityobw/SIDIK-ML?label=Release&color=ea580c)](https://github.com/radityobw/SIDIK-ML/releases/latest)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/radityobw/SIDIK-ML/sidik-ml-ci.yml?label=CI&color=22c55e)](https://github.com/radityobw/SIDIK-ML/actions/workflows/sidik-ml-ci.yml)
 [![Paradigm Non-ANN Only](https://img.shields.io/badge/Paradigm-Non--ANN%20Only-ea580c.svg)](#)
+[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-f59e0b.svg)](https://radityobw.github.io/SIDIK-ML/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-a855f7.svg)](https://github.com/radityobw/SIDIK-ML/blob/main/LICENSE)
 
 </div>
