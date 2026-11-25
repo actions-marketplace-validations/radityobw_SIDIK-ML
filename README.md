@@ -8,8 +8,8 @@
 *Explainable Classical Non-ANN Machine Learning Extension for False Positive Reduction in SIDIK Static Secret Detection*
 
 [![Python 3.9+](https://img.shields.io/pypi/pyversions/sidik-ml?color=3b82f6)](https://pypi.org/project/sidik-ml/)
-[![PyPI Version](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b)](https://pypi.org/project/sidik-ml/)
-[![GitHub Release](https://img.shields.io/github/v/release/radityobw/SIDIK-ML?label=Release&color=ea580c)](https://github.com/radityobw/SIDIK-ML/releases/latest)
+[![PyPI Version](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b&cacheSeconds=3600)](https://pypi.org/project/sidik-ml/)
+[![GitHub Release](https://img.shields.io/github/v/release/radityobw/SIDIK-ML?label=Release&color=ea580c&cacheSeconds=3600)](https://github.com/radityobw/SIDIK-ML/releases/latest)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/radityobw/SIDIK-ML/sidik-ml-ci.yml?label=CI&color=22c55e)](https://github.com/radityobw/SIDIK-ML/actions/workflows/sidik-ml-ci.yml)
 [![Paradigm Non-ANN Only](https://img.shields.io/badge/Paradigm-Non--ANN%20Only-ea580c.svg)](#)
 [![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-f59e0b.svg)](https://radityobw.github.io/SIDIK-ML/)
@@ -210,8 +210,8 @@ docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /worksp
 
 | Repositori | Peran Utama | Versi Terkini | Tautan |
 | :--- | :--- | :---: | :--- |
-| **SIDIK** | Mesin pemindai deterministik SAST & OSV SCA + host *plugin* UI | [![PyPI](https://img.shields.io/pypi/v/sidik?label=PyPI&color=0ea5e9)](https://pypi.org/project/sidik/) | [`github.com/radityobw/SIDIK`](https://github.com/radityobw/SIDIK) |
-| **SIDIK-ML** | Perangkat lunak ekstensi *Explainable Non-ANN ML* & *plugin* | [![PyPI](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b)](https://pypi.org/project/sidik-ml/) | [`github.com/radityobw/SIDIK-ML`](https://github.com/radityobw/SIDIK-ML) |
+| **SIDIK** | Mesin pemindai deterministik SAST & OSV SCA + host *plugin* UI | [![PyPI](https://img.shields.io/pypi/v/sidik?label=PyPI&color=0ea5e9&cacheSeconds=3600)](https://pypi.org/project/sidik/) | [`github.com/radityobw/SIDIK`](https://github.com/radityobw/SIDIK) |
+| **SIDIK-ML** | Perangkat lunak ekstensi *Explainable Non-ANN ML* & *plugin* | [![PyPI](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b&cacheSeconds=3600)](https://pypi.org/project/sidik-ml/) | [`github.com/radityobw/SIDIK-ML`](https://github.com/radityobw/SIDIK-ML) |
 
 ---
 
