@@ -14,7 +14,7 @@ WORKDIR /app
 COPY pyproject.toml README.md LICENSE ./
 COPY sidik_ml ./sidik_ml
 
-RUN (pip install --no-cache-dir "sidik>=1.3.4,<2.0.0" || pip install --no-cache-dir "https://github.com/radityobw/SIDIK/archive/refs/heads/main.tar.gz") \
+RUN (pip install --no-cache-dir "sidik>=1.4.0,<2.0.0" || pip install --no-cache-dir "https://github.com/radityobw/SIDIK/archive/refs/heads/main.tar.gz") \
     && pip install --no-cache-dir . \
     && adduser --disabled-password --gecos "" sidik
 

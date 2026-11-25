@@ -533,6 +533,99 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
                     doc = json.load(fh)
                 self.assertEqual(doc["findings"][0]["metadata"]["ml_triage"]["model_name"], expected_fname)
 
+    def test_v059_polyglot_multi_ecosystem_scan_and_db_cli_passthrough(self):
+        import argparse
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+
+        with tempfile.TemporaryDirectory() as tmp:
+            proj_dir = os.path.join(tmp, "polyglot_app")
+            os.makedirs(proj_dir)
+            with open(os.path.join(proj_dir, "service.ts"), "w", encoding="utf-8") as fh:
+                fh.write(
+                    'const awsKey = "AKIAJ2M4K8P9Q3R7W5T1";\n'
+                    '// const dummy_key = "AKIAJ2M4K8P9Q3R7W5T2";\n'
+                    '// const suppressedKey = "AKIAJ2M4K8P9Q3R7W5T3"; // nosec\n'
+                    "const token = process.env.API_TOKEN;\n"
+                )
+            with open(os.path.join(proj_dir, "main.go"), "w", encoding="utf-8") as fh:
+                fh.write(
+                    'package main\n'
+                    'import "os"\n'
+                    'const ghToken = "ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789"\n'
+                    'func getTok() string { return os.Getenv("GITHUB_TOKEN") }\n'
+                )
+            with open(os.path.join(proj_dir, "package.json"), "w", encoding="utf-8") as fh:
+                json.dump({"name": "poly-demo", "dependencies": {"lodash": "4.17.15"}}, fh)
+            with open(os.path.join(proj_dir, "go.mod"), "w", encoding="utf-8") as fh:
+                fh.write("module example.com/demo\n\ngo 1.21\n\nrequire golang.org/x/net v0.15.0\n")
+            with open(os.path.join(proj_dir, "pom.xml"), "w", encoding="utf-8") as fh:
+                fh.write(
+                    "<project><dependencies><dependency>"
+                    "<groupId>org.apache.logging.log4j</groupId>"
+                    "<artifactId>log4j-core</artifactId>"
+                    "<version>2.14.1</version>"
+                    "</dependency></dependencies></project>\n"
+                )
+
+            out_json = os.path.join(tmp, "poly_out.json")
+            rc = cli_main([
+                proj_dir,
+                "--model", "random_forest",
+                "--fail-on", "none",
+                "--format", "json",
+                "--quiet",
+                "-o", out_json,
+            ])
+            self.assertEqual(rc, 0)
+            with open(out_json, "r", encoding="utf-8") as fh:
+                doc = json.load(fh)
+
+            sec_findings = [f for f in doc["findings"] if f["finding_type"] == "secret"]
+            dep_findings = [f for f in doc["findings"] if f["finding_type"] == "dependency"]
+
+            self.assertEqual(len(sec_findings), 2)
+            sec_exts = {os.path.splitext(f["file_path"])[1] for f in sec_findings}
+            self.assertEqual(sec_exts, {".ts", ".go"})
+            for sf in sec_findings:
+                self.assertEqual(sf["metadata"]["ml_triage"]["model_name"], "default_random_forest.json")
+
+            dep_ecos = {df["metadata"].get("ecosystem") for df in dep_findings}
+            self.assertTrue({"npm", "Go", "Maven"}.issubset(dep_ecos))
+            dep_cves = {df["metadata"].get("cve") for df in dep_findings}
+            self.assertTrue({"CVE-2020-8203", "CVE-2023-44487", "CVE-2021-44228"}.issubset(dep_cves))
+            for df in dep_findings:
+                self.assertNotIn("ml_triage", df["metadata"])
+
+        # db-info subcommand and --db-info flag passthrough
+        for argv in (["db-info"], ["--db-info"]):
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc_db = cli_main(argv)
+            self.assertEqual(rc_db, 0)
+            out_txt = buf.getvalue()
+            self.assertIn("PyPI Advisories", out_txt)
+            self.assertIn("Multi-Eco Built-in", out_txt)
+
+        # update-db subcommand and --update-db flag passthrough
+        with patch("sidik.cli.run_cli_with_args", return_value=0) as mock_run:
+            rc_u1 = cli_main(["update-db", "--ecosystem", "npm,go"])
+            self.assertEqual(rc_u1, 0)
+            mock_run.assert_called_once_with(["--update-db", "--ecosystem", "npm,go"], exit_on_finish=False)
+
+            mock_run.reset_mock()
+            rc_u2 = cli_main(["--update-db", "--ecosystem", "all"])
+            self.assertEqual(rc_u2, 0)
+            mock_run.assert_called_once_with(["--update-db", "--ecosystem", "all"], exit_on_finish=False)
+
+        # Fail closed when an older SIDIK parser lacks --ecosystem
+        old_parser = argparse.ArgumentParser()
+        err_buf = io.StringIO()
+        with patch("sidik.cli.build_arg_parser", return_value=old_parser), redirect_stderr(err_buf):
+            rc_old = cli_main(["update-db", "--ecosystem", "npm"])
+        self.assertEqual(rc_old, 2)
+        self.assertIn("SIDIK >=1.4.0", err_buf.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

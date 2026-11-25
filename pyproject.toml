@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 authors = [
     {name = "Radityo Budi Waskito"},
 ]
-keywords = ["security", "sast", "secret-detection", "machine-learning", "explainable-ai", "non-neural"]
+keywords = ["security", "sast", "sca", "polyglot", "osv", "secret-detection", "machine-learning", "explainable-ai", "non-neural"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
