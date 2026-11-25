@@ -448,6 +448,91 @@ class TestSidikMLPluginIntegration(unittest.TestCase):
             self.assertEqual(ml_meta["model_name"], "default_gradient_boosting.json")
             self.assertEqual(ml_meta["model_version"], ML_VERSION)
 
+    def test_all_five_bundled_models_preset_resolution_roundtrip_and_cli_models(self):
+        import io
+        from contextlib import redirect_stdout
+        from sidik_ml.explainability import explain_single_candidate
+        from sidik_ml.models import SUPPORTED_MODELS
+        from sidik_ml.serialization import (
+            PortableGradientBoostingClassifier,
+            PortableLogisticRegressionClassifier,
+            PortableTreeEnsembleClassifier,
+            export_portable_model,
+            list_bundled_models,
+            load_bundled_model,
+            load_verified_model,
+        )
+
+        # 1. All 5 Non-ANN models are bundled with valid SHA-256 manifests and reject tampered checksums
+        catalog = list_bundled_models()
+        self.assertEqual(set(catalog.keys()), set(SUPPORTED_MODELS))
+        expected_types = {
+            "gradient_boosting": PortableGradientBoostingClassifier,
+            "logistic_regression": PortableLogisticRegressionClassifier,
+            "decision_tree": PortableTreeEnsembleClassifier,
+            "random_forest": PortableTreeEnsembleClassifier,
+            "extra_trees": PortableTreeEnsembleClassifier,
+        }
+        for name, exp_cls in expected_types.items():
+            clf_b = load_bundled_model(name)
+            self.assertIsInstance(clf_b, exp_cls)
+            self.assertEqual(clf_b.n_features_in_, len(FEATURE_NAMES))
+            res_p, bad_sha = resolve_model_and_sha256(name, "0" * 64)
+            self.assertEqual(res_p, catalog[name]["path"])
+            with self.assertRaises(ValueError):
+                load_verified_model(res_p, bad_sha)
+
+        # 2. Export -> load round-trip equivalence across all 5 Non-ANN architectures
+        recs = _build_contract_fixture_records()
+        X, y, _ = records_to_matrix(recs)
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in SUPPORTED_MODELS:
+                sk_clf = create_non_ann_model(name, random_state=42)
+                sk_clf.fit(X, y)
+                out_p = os.path.join(tmp, f"rt_{name}.json")
+                manifest = export_portable_model(sk_clf, out_p, metadata={"model_name": name})
+                pt_clf = load_verified_model(out_p, manifest["sha256"])
+                sk_probs = sk_clf.predict_proba(X)
+                pt_probs = pt_clf.predict_proba(X)
+                max_diff = max(abs(float(a[1]) - float(b[1])) for a, b in zip(sk_probs, pt_probs))
+                self.assertLess(max_diff, 1e-9, f"{name} round-trip max_abs_diff={max_diff}")
+                sk_exp = explain_single_candidate(sk_clf, X[0])
+                pt_exp = explain_single_candidate(pt_clf, X[0])
+                self.assertEqual(list(sk_exp.keys()), list(pt_exp.keys()))
+
+            # 3. CLI 'sidik-ml models --json' and preset names ('random_forest', 'lr', 'preset:decision_tree')
+            models_buf = io.StringIO()
+            with redirect_stdout(models_buf):
+                rc_models = cli_main(["models", "--json"])
+            self.assertEqual(rc_models, 0)
+            parsed_cat = json.loads(models_buf.getvalue())
+            self.assertEqual(set(parsed_cat.keys()), set(SUPPORTED_MODELS))
+
+            proj_dir = os.path.join(tmp, "preset_app")
+            os.makedirs(proj_dir)
+            with open(os.path.join(proj_dir, "app.py"), "w", encoding="utf-8") as fh:
+                fh.write("aws_prod_key = 'AKIAJ2M4K8P9Q3R7W5T1'\n")
+
+            for preset_arg, expected_fname in [
+                ("random_forest", "default_random_forest.json"),
+                ("lr", "default_logistic_regression.json"),
+                ("preset:decision_tree", "default_decision_tree.json"),
+            ]:
+                out_json = os.path.join(tmp, f"out_{expected_fname}.json")
+                rc = cli_main([
+                    proj_dir,
+                    "--mode", "secret",
+                    "--model", preset_arg,
+                    "--fail-on", "none",
+                    "--format", "json",
+                    "--quiet",
+                    "-o", out_json,
+                ])
+                self.assertEqual(rc, 0)
+                with open(out_json, "r", encoding="utf-8") as fh:
+                    doc = json.load(fh)
+                self.assertEqual(doc["findings"][0]["metadata"]["ml_triage"]["model_name"], expected_fname)
+
 
 if __name__ == "__main__":
     unittest.main()

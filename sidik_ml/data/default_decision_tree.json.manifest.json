@@ -1,0 +1,15 @@
+{
+  "model_file": "default_decision_tree.json",
+  "sha256": "4a77a57a2b8ba10abd40a8d549804ecc00766e3b406911393de8b425770e84d5",
+  "format": "sidik_portable_tree_ensemble_v1",
+  "metadata": {
+    "training_corpus": "Samsung/CredData (Apache-2.0, 258 train candidates across 86 repositories)",
+    "candidate_schema_version": "1.0.0",
+    "feature_schema_version": "1.0.0",
+    "random_state": 42,
+    "portable_version_independent": true,
+    "model_name": "decision_tree",
+    "n_trees": 1,
+    "n_features": 30
+  }
+}

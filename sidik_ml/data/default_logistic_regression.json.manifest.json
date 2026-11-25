@@ -1,0 +1,14 @@
+{
+  "model_file": "default_logistic_regression.json",
+  "sha256": "decb86429d4313a5c3e8878415a5b964ce7d1e74cd5a45038a57adcdf5edb217",
+  "format": "sidik_portable_linear_v1",
+  "metadata": {
+    "training_corpus": "Samsung/CredData (Apache-2.0, 258 train candidates across 86 repositories)",
+    "candidate_schema_version": "1.0.0",
+    "feature_schema_version": "1.0.0",
+    "random_state": 42,
+    "portable_version_independent": true,
+    "model_name": "logistic_regression",
+    "n_features": 30
+  }
+}
