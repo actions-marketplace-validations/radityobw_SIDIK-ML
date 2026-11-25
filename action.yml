@@ -28,11 +28,11 @@ inputs:
     required: false
     default: "en"
   model:
-    description: "Optional path to verified .skops model artifact"
+    description: "Optional bundled preset (gradient_boosting, random_forest, extra_trees, logistic_regression, decision_tree) or .skops/.json model path"
     required: false
     default: ""
   sha256:
-    description: "Optional expected SHA-256 checksum for the .skops artifact"
+    description: "Optional expected SHA-256 checksum for a custom .skops or .json model artifact"
     required: false
     default: ""
   threshold:

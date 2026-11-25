@@ -9,20 +9,30 @@ from sidik_ml._version import __version__
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.schemas import TriagePolicy
 from sidik_ml.serialization import (
+    BUNDLED_MODEL_PROFILES,
     get_bundled_default_model_path,
+    get_bundled_model_path,
     get_ml_cache_dir,
+    list_bundled_models,
     load_verified_model,
 )
 
 
 def resolve_model_and_sha256(model_path: str, sha256: Optional[str] = None) -> Tuple[str, str]:
-    """Resolves a .skops or portable .json model path and verifies presence of its SHA-256 checksum."""
-    if not model_path or not os.path.isfile(model_path):
+    """Resolves a bundled preset name or .skops/.json path and verifies presence of its SHA-256 checksum."""
+    if not model_path or not model_path.strip():
         raise ValueError(f"Model artifact not found: {model_path}")
+    resolved_path = model_path.strip()
+    if not os.path.isfile(resolved_path):
+        bundled = get_bundled_model_path(resolved_path)
+        if bundled:
+            resolved_path = bundled
+        else:
+            raise ValueError(f"Model artifact not found: {model_path}")
     if sha256 and sha256.strip():
-        return model_path, sha256.strip()
+        return resolved_path, sha256.strip()
 
-    manifest_path = f"{model_path}.manifest.json"
+    manifest_path = f"{resolved_path}.manifest.json"
     if not os.path.isfile(manifest_path):
         raise ValueError(
             f"SHA-256 digest is required: provide --ml-sha256/--sha256 or place a valid manifest at {manifest_path}."
@@ -32,7 +42,7 @@ def resolve_model_and_sha256(model_path: str, sha256: Optional[str] = None) -> T
     digest = str(data.get("sha256", "")).strip()
     if not digest:
         raise ValueError(f"Manifest does not contain a valid 'sha256' field: {manifest_path}")
-    return model_path, digest
+    return resolved_path, digest
 
 
 def discover_default_model() -> Optional[Tuple[str, str]]:
@@ -77,6 +87,10 @@ class SidikMLPlugin:
     def discover_default_model(self) -> Optional[Tuple[str, str]]:
         """Exposes verified local or bundled model auto-discovery to SIDIK interactive CLI and GUI."""
         return discover_default_model()
+
+    def list_bundled_models(self) -> Dict[str, Dict[str, Any]]:
+        """Lists all bundled pre-trained Non-ANN models with SHA-256 manifests and profiles."""
+        return list_bundled_models()
 
     def _get_classifier(self, model_path: Optional[str], sha256: Optional[str]) -> Tuple[Optional[Any], str]:
         if not model_path:

@@ -23,7 +23,12 @@ from sidik_ml.features import extract_feature_dict
 from sidik_ml.integration import HybridTriagePipeline
 from sidik_ml.plugin import SidikMLPlugin, discover_default_model, resolve_model_and_sha256
 from sidik_ml.schemas import TriagePolicy
-from sidik_ml.serialization import fetch_verified_model, load_verified_model, verify_artifact_sha256
+from sidik_ml.serialization import (
+    fetch_verified_model,
+    list_bundled_models,
+    load_verified_model,
+    verify_artifact_sha256,
+)
 from sidik_ml.training import train_and_compare_models
 
 
@@ -33,6 +38,7 @@ KNOWN_SUBCOMMANDS = {
     "cli",
     "tui",
     "gui",
+    "models",
     "extract-features",
     "verify-model",
     "train",
@@ -72,7 +78,7 @@ def _add_shared_ml_args(subparser: argparse.ArgumentParser) -> None:
         "--model", "--ml-model",
         dest="model",
         default=None,
-        help="Optional path to verified .skops model artifact",
+        help="Bundled preset (gradient_boosting, random_forest, extra_trees, logistic_regression, decision_tree) or .skops/.json path",
     )
     subparser.add_argument(
         "--sha256", "--ml-sha256",
@@ -101,9 +107,10 @@ def build_parser() -> argparse.ArgumentParser:
         description="SIDIK-ML: Explainable Non-ANN ML Extension for SIDIK Static Security Analysis",
         epilog=(
             "Examples (symmetric with SIDIK):\n"
+            "  sidik-ml models                                    # List all 5 bundled Non-ANN models\n"
             "  sidik-ml -i                                        # Launch Amber-Orange Interactive Console (TUI)\n"
             "  sidik-ml --gui                                     # Launch SIDIK-ML Desktop GUI (alias: sidik-ml gui)\n"
-            "  sidik-ml .                                         # Scan current directory with ML triage\n"
+            "  sidik-ml . --model random_forest                   # Scan using bundled Random Forest preset\n"
             "  sidik-ml --target . --include-deps --format html   # Full Secret + SCA HTML dashboard\n"
             "  sidik-ml train data.jsonl -o artifacts/ --stratified"
         ),
@@ -182,6 +189,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_gui = sub.add_parser("gui", help="Launch SIDIK Desktop GUI with SIDIK-ML plugin pre-enabled")
     _add_shared_ml_args(p_gui)
 
+    p_models = sub.add_parser("models", help="List all 5 bundled SHA-256-verified pre-trained Non-ANN models")
+    p_models.add_argument("--json", action="store_true", help="Emit JSON output")
+
     p_feat = sub.add_parser("extract-features", help="Export leakage-free feature JSONL from target candidates")
     p_feat.add_argument("target", help="File or directory path to inspect")
     p_feat.add_argument("--output", "-o", required=True, help="Output JSONL file path")
@@ -230,23 +240,53 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(_normalize_argv(raw_argv))
 
+    if args.command == "models":
+        catalog = list_bundled_models()
+        if args.json:
+            print(json.dumps(catalog, indent=2))
+        else:
+            print("Bundled SHA-256-Verified Non-ANN Models (Out-of-the-Box):")
+            for name, info in catalog.items():
+                marker = " [DEFAULT]" if info.get("is_default") else ""
+                print(
+                    f"  - {name:20s} | {info['size_kb']:6.2f} KB | sha256={info['sha256'][:12]}...{marker}"
+                    f" | {info['profile']}"
+                )
+        return 0
+
     if args.command in ("interactive", "cli", "tui") or (args.command is None and args.interactive):
         from sidik.cli import run_interactive_cli
+        m_arg = getattr(args, "model", None)
+        s_arg = getattr(args, "sha256", None)
+        if m_arg:
+            try:
+                m_arg, s_arg = resolve_model_and_sha256(m_arg, s_arg)
+            except ValueError as exc:
+                print(f"Error: {exc}", file=sys.stderr)
+                return 2
         return run_interactive_cli(
             initial_lang=getattr(args, "lang", "id"),
             enable_ml_plugin=True,
-            ml_model_path=getattr(args, "model", None),
-            ml_sha256=getattr(args, "sha256", None),
+            ml_model_path=m_arg,
+            ml_sha256=s_arg,
             ml_threshold=getattr(args, "threshold", 0.5),
             ml_suppress_fp=getattr(args, "suppress_fp", False),
             banner_title="SIDIK-ML",
         )
 
     if args.command == "gui" or (args.command is None and args.gui):
+        m_arg = getattr(args, "model", None)
+        s_arg = getattr(args, "sha256", None)
+        if m_arg:
+            try:
+                m_arg, s_arg = resolve_model_and_sha256(m_arg, s_arg)
+            except ValueError as exc:
+                print(f"Error: {exc}", file=sys.stderr)
+                return 2
         return _safe_launch_gui(
             enable_ml=True,
-            ml_model_path=getattr(args, "model", None),
-            ml_sha256=getattr(args, "sha256", None),
+            ml_model_path=m_arg,
+            ml_sha256=s_arg,
             ml_threshold=getattr(args, "threshold", 0.5),
             ml_suppress_fp=getattr(args, "suppress_fp", False),
             app_brand="SIDIK-ML",
@@ -315,7 +355,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     resolved_sha: Optional[str] = args.sha256
     if model_path_arg:
         try:
-            _, resolved_sha = resolve_model_and_sha256(model_path_arg, args.sha256)
+            model_path_arg, resolved_sha = resolve_model_and_sha256(model_path_arg, args.sha256)
         except ValueError as exc:
             print(f"Error: {exc}", file=sys.stderr)
             return 2

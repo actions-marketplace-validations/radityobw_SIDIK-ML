@@ -15,6 +15,17 @@ def _unwrap_estimator(model: Any) -> Any:
     return model
 
 
+def _extract_coef_vector(coef_attr: Any) -> List[float]:
+    """Converts 1D or 2D coef_ arrays or nested Python lists into a flat float list."""
+    if hasattr(coef_attr, "tolist"):
+        raw = coef_attr.tolist()
+    else:
+        raw = list(coef_attr)
+    if raw and isinstance(raw[0], (list, tuple)):
+        return [float(v) for v in raw[0]]
+    return [float(v) for v in raw]
+
+
 def extract_global_explanations(
     model: Any,
     X_eval: Sequence[Sequence[float]],
@@ -33,8 +44,7 @@ def extract_global_explanations(
         paired = sorted(zip(names, raw), key=lambda kv: abs(kv[1]), reverse=True)
         native_weights = {k: round(v, 6) for k, v in paired[:top_k]}
     elif hasattr(est, "coef_"):
-        coefs = est.coef_[0] if len(est.coef_.shape) > 1 else est.coef_
-        raw = [float(v) for v in coefs]
+        raw = _extract_coef_vector(est.coef_)
         paired = sorted(zip(names, raw), key=lambda kv: abs(kv[1]), reverse=True)
         native_weights = {k: round(v, 6) for k, v in paired[:top_k]}
 
@@ -76,11 +86,13 @@ def explain_single_candidate(
     contribs: List[tuple[str, float]] = []
     if hasattr(est, "coef_"):
         vec = list(feature_vector)
-        if isinstance(model, Pipeline) and "scaler" in model.named_steps:
+        if hasattr(model, "scale_feature_vector"):
+            scaled = model.scale_feature_vector(vec)
+        elif isinstance(model, Pipeline) and "scaler" in model.named_steps:
             scaled = model.named_steps["scaler"].transform([vec])[0]
         else:
             scaled = vec
-        coefs = est.coef_[0] if len(est.coef_.shape) > 1 else est.coef_
+        coefs = _extract_coef_vector(est.coef_)
         for name, c_val, x_val in zip(names, coefs, scaled):
             contribs.append((name, float(c_val) * float(x_val)))
     elif hasattr(est, "feature_importances_"):
