@@ -7,6 +7,7 @@ import shutil
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = Path(__file__).resolve().parent
@@ -52,15 +53,15 @@ def _render_latest_releases(max_releases: int = 2) -> tuple[str, int]:
         return "<p>No changelog entries found.</p>", 0
 
     sections: list[tuple[str, str, list[str]]] = []
-    cur_ver = ""
-    cur_date = ""
+    cur_ver: Optional[str] = None
+    cur_date: str = ""
     cur_bullets: list[str] = []
 
     for raw in cl_path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()
         hm = re.match(r"^##\s+\[([^\]]+)\]\s*-\s*(\d{4}-\d{2}-\d{2})", line)
         if hm:
-            if cur_ver:
+            if cur_ver is not None:
                 sections.append((cur_ver, cur_date, cur_bullets))
                 if len(sections) >= max_releases:
                     break
@@ -68,10 +69,10 @@ def _render_latest_releases(max_releases: int = 2) -> tuple[str, int]:
             cur_date = hm.group(2)
             cur_bullets = []
             continue
-        if cur_ver and line.startswith("- ") and len(cur_bullets) < 4:
+        if cur_ver is not None and line.startswith("- ") and len(cur_bullets) < 4:
             cur_bullets.append(line[2:].strip())
 
-    if cur_ver and len(sections) < max_releases:
+    if cur_ver is not None and len(sections) < max_releases:
         sections.append((cur_ver, cur_date, cur_bullets))
 
     cards = []
@@ -136,6 +137,7 @@ def build_site(out_dir: Path) -> None:
     for fname in (
         ".nojekyll",
         "robots.txt",
+        "sitemap.txt",
         "og-banner.png",
         "favicon.ico",
         "favicon-48x48.png",
