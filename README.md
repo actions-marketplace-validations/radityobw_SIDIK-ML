@@ -8,10 +8,11 @@
 *Explainable Classical Non-ANN Machine Learning Extension for False Positive Reduction in SIDIK Static Secret Detection*
 
 [![Python 3.9+](https://img.shields.io/pypi/pyversions/sidik-ml?color=3b82f6)](https://pypi.org/project/sidik-ml/)
-[![PyPI Version](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b)](https://pypi.org/project/sidik-ml/)
-[![GitHub Release](https://img.shields.io/github/v/release/radityobw/SIDIK-ML?label=Release&color=ea580c)](https://github.com/radityobw/SIDIK-ML/releases/latest)
+[![PyPI Version](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b&cacheSeconds=3600)](https://pypi.org/project/sidik-ml/)
+[![GitHub Release](https://img.shields.io/github/v/release/radityobw/SIDIK-ML?label=Release&color=ea580c&cacheSeconds=3600)](https://github.com/radityobw/SIDIK-ML/releases/latest)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/radityobw/SIDIK-ML/sidik-ml-ci.yml?label=CI&color=22c55e)](https://github.com/radityobw/SIDIK-ML/actions/workflows/sidik-ml-ci.yml)
 [![Paradigm Non-ANN Only](https://img.shields.io/badge/Paradigm-Non--ANN%20Only-ea580c.svg)](#)
+[![Docs](https://img.shields.io/badge/Docs-GitHub%20Pages-f59e0b.svg)](https://radityobw.github.io/SIDIK-ML/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-a855f7.svg)](https://github.com/radityobw/SIDIK-ML/blob/main/LICENSE)
 
 </div>
@@ -22,7 +23,7 @@
 
 ## 📌 Ikhtisar Proyek & Filosofi Desain
 
-**SIDIK-ML** adalah paket perangkat lunak Python independen yang memperluas kemampuan pemindai deterministik [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.4`) dengan lapisan penyaringan *false positive* berbasis **klasifikasi klasik *Non-Artificial Neural Network* (*Non-ANN*) yang terjelaskan**.
+**SIDIK-ML** adalah paket perangkat lunak Python independen yang memperluas kemampuan pemindai deterministik [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.4`; dukungan penuh *polyglot* + 8 ekosistem mulai `SIDIK >=v1.4.0`) dengan lapisan penyaringan *false positive* berbasis **klasifikasi klasik *Non-Artificial Neural Network* (*Non-ANN*) yang terjelaskan**.
 
 Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *deep neural network* berbobot ratusan megabita, `SIDIK-ML` bekerja sebagai *plugin* opsional melalui kontrak data aman `SecretCandidate` (`schema_version = "1.0.0"`) dan *entry point* standar `sidik.plugins`. Ketika dijalankan melalui `sidik-ml gui`, `sidik-ml interactive`, maupun `--enable-ml`, antarmuka menampilkan tema khusus **Amber Orange (`#f59e0b` / `#ea580c`)** lengkap dengan lencana `NON-ANN ML`, *prompt* `sidik-ml>`, serta dasbor HTML bernuansa kuning-oranye agar langsung terbedakan dari mode deterministik standar **Ocean Blue (`#3b82f6`)** milik `SIDIK`.
 
@@ -40,9 +41,9 @@ Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *d
 4. **Kebijakan *Triage* Hibrida *Fail-Safe* (`TriagePolicy`):**
    - Secara *default* beroperasi pada mode konsultatif (`suppress_false_positives=False`) sehingga seluruh temuan deterministik `SIDIK` tetap ditampilkan bersama probabilitas rahasia dan kontribusi fitur pendorongnya (`explain_single_candidate()`).
    - Saat supresi diaktifkan, `never_suppress_severities=("CRITICAL",)` melindungi temuan kritis agar tidak pernah dibungkam diam-diam oleh model ML.
-5. **Integrasi Penuh *Plugin* (`sidik.plugins`) & *Thin Launcher* TUI/GUI/SCA:**
+5. **Integrasi Penuh *Plugin* (`sidik.plugins`) & *Thin Launcher* TUI/GUI/*Polyglot* SAST + 8-Ekosistem SCA:**
    - Terdaftar ke grup `sidik.plugins` melalui [plugin.py](https://github.com/radityobw/SIDIK-ML/blob/main/sidik_ml/plugin.py), sehingga perintah `sidik-ml interactive`, `sidik-ml gui`, dan `sidik-ml-gui` membuka antarmuka TUI serta *Desktop GUI* `SIDIK` dengan kontrol *ML Triage* aktif.
-   - `sidik-ml scan` mendukung paritas CI/CD (`--fail-on`, `--severity`, `--mode`, `--baseline`, `--sarif-output`), `--include-deps` (OSV SCA), `fetch-model`, serta 8 format laporan (`console`, `compact`, `sarif`, `github`, `html`, `markdown`, `json`, `csv`).
+   - Saat dipasangkan dengan `SIDIK >=v1.4.0`, `sidik-ml scan` otomatis mendukung pemindaian *polyglot* (`30+` ekstensi bahasa/konfigurasi seperti `.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`, `.php`, `.rb`, `.cs`, `.env`, `Dockerfile`) serta SCA OSV *offline* lintas 8 ekosistem (`PyPI`, `npm`, `Go`, `crates.io`, `Maven`, `Packagist`, `RubyGems`, `NuGet`; `19` format *manifest*/*lockfile*), lengkap dengan paritas CI/CD (`--fail-on`, `--severity`, `--mode`, `--baseline`, `--sarif-output`), `--include-deps`, `update-db`, `db-info`, `fetch-model`, dan 8 format laporan (`console`, `compact`, `sarif`, `github`, `html`, `markdown`, `json`, `csv`).
 6. **Lima Model Bawaan Siap Pakai (*Out-of-the-Box*) & Serialisasi Terverifikasi *SHA-256* (`portable JSON` & `skops`):**
    - Menyertakan seluruh **5 model *Non-ANN* terbundel** berformat *portable JSON* terverifikasi *SHA-256* (`gradient_boosting` sebagai bawaan `~46 KB`, `random_forest` `~172 KB`, `extra_trees` `~338 KB`, `logistic_regression` `~2,4 KB`, dan `decision_tree` `~2,2 KB`, terlatih pada korpus terbuka Apache-2.0 *Samsung/CredData*) tanpa *version skew* lintas versi `scikit-learn`/Python.
    - Daftar dan pilih *preset* secara instan via `sidik-ml models` atau `--model <preset>` (misalnya `random_forest` atau `lr`), dan tetap mendukung artefak `.skops`/`.json` kustom dengan `SAFE_SKOPS_TYPE_PREFIXES` tanpa `pickle`/`joblib` mentah.
@@ -55,7 +56,7 @@ Alih-alih mengganti mesin aturan deterministik `SIDIK` atau menyisipkan model *d
 Kode Sumber & Manifes Target
            │
            ▼
-   SIDIK Core (>=v1.3.4, SAST 12 Aturan Regex + Entropi + Konteks + Offline OSV SCA)
+   SIDIK Core (>=v1.4.0: Polyglot SAST 30+ Ekstensi + Offline OSV SCA 8 Ekosistem; kompatibel >=v1.3.4)
            │
            ├──[Kontrak SecretCandidate v1.0.0 (masked_value + value_sha256)]──┐
            │                                                                   ▼
@@ -165,36 +166,41 @@ sidik-ml models              # Tampilkan 5 model Non-ANN siap pakai & checksum S
 sidik-ml -i                  # atau: sidik-ml interactive / python -m sidik_ml -i / run_sidik_ml_cli.bat
 sidik-ml --gui               # atau: sidik-ml gui / sidik-ml-gui / python -m sidik_ml --gui / run_sidik_ml.bat
 
-# 2. Pindai langsung (bawaan Gradient Boosting, atau pilih preset random_forest / lr / dt / et)
+# 2. Pindai langsung proyek Python maupun polyglot (bawaan Gradient Boosting, atau pilih preset)
 sidik-ml . --fail-on high
 sidik-ml . --model random_forest --fail-on high
 sidik-ml --target path/to/project --include-deps --model model.skops --format html -o hasil_ml.html
 sidik-ml scan path/to/project --include-deps --model model.skops --format html -o hasil_ml.html
 
-# 3. Pindai dengan output ringkas / JSON (tanpa supresi default)
+# 3. Sinkronisasi database OSV luring (8 ekosistem / all) & cek statistik SQLite lokal
+sidik-ml db-info
+sidik-ml update-db --ecosystem npm,go,crates
+# sidik-ml update-db --ecosystem all
+
+# 4. Pindai dengan output ringkas / JSON (tanpa supresi default)
 sidik-ml scan path/to/project --format compact --fail-on none
 sidik-ml scan path/to/project --json --fail-on none
 
-# 4. Atau gunakan langsung dari perintah standar SIDIK
+# 5. Atau gunakan langsung dari perintah standar SIDIK
 sidik --list-plugins
 sidik --target path/to/project --enable-ml --ml-model model.skops
 
-# 5. Unduh model .skops terverifikasi SHA-256 ke cache pengguna
+# 6. Unduh model .skops terverifikasi SHA-256 ke cache pengguna
 sidik-ml fetch-model https://example.com/gradient_boosting.skops --sha256 <hex_digest>
 
-# 6. Ekspor fitur bebas leakage dari kandidat untuk anotasi / eksperimen
+# 7. Ekspor fitur bebas leakage dari kandidat untuk anotasi / eksperimen
 sidik-ml extract-features path/to/project --output candidates.jsonl --repo-id my_repo
 
-# 7. Verifikasi integritas checksum SHA-256 artefak model .skops
+# 8. Verifikasi integritas checksum SHA-256 artefak model .skops
 sidik-ml verify-model model.skops --sha256 <hex_digest>
 
-# 8. Latih & bandingkan 5 model Non-ANN menggunakan StratifiedGroupKFold
+# 9. Latih & bandingkan 5 model Non-ANN menggunakan StratifiedGroupKFold
 sidik-ml train dataset.jsonl --output-dir artifacts/ --stratified
 
-# 9. Jalankan seluruh unit & integration tests
+# 10. Jalankan seluruh unit & integration tests
 pytest tests -v
 
-# 10. Atau jalankan lewat GitHub Container Registry (ghcr.io) tanpa setup Python
+# 11. Atau jalankan lewat GitHub Container Registry (ghcr.io) tanpa setup Python
 docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /workspace --include-deps
 ```
 
@@ -204,8 +210,8 @@ docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /worksp
 
 | Repositori | Peran Utama | Versi Terkini | Tautan |
 | :--- | :--- | :---: | :--- |
-| **SIDIK** | Mesin pemindai deterministik SAST & OSV SCA + host *plugin* UI | [![PyPI](https://img.shields.io/pypi/v/sidik?label=PyPI&color=0ea5e9)](https://pypi.org/project/sidik/) | [`github.com/radityobw/SIDIK`](https://github.com/radityobw/SIDIK) |
-| **SIDIK-ML** | Perangkat lunak ekstensi *Explainable Non-ANN ML* & *plugin* | [![PyPI](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b)](https://pypi.org/project/sidik-ml/) | [`github.com/radityobw/SIDIK-ML`](https://github.com/radityobw/SIDIK-ML) |
+| **SIDIK** | Mesin pemindai deterministik SAST & OSV SCA + host *plugin* UI | [![PyPI](https://img.shields.io/pypi/v/sidik?label=PyPI&color=0ea5e9&cacheSeconds=3600)](https://pypi.org/project/sidik/) | [`github.com/radityobw/SIDIK`](https://github.com/radityobw/SIDIK) |
+| **SIDIK-ML** | Perangkat lunak ekstensi *Explainable Non-ANN ML* & *plugin* | [![PyPI](https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b&cacheSeconds=3600)](https://pypi.org/project/sidik-ml/) | [`github.com/radityobw/SIDIK-ML`](https://github.com/radityobw/SIDIK-ML) |
 
 ---
 
@@ -213,7 +219,7 @@ docker run --rm -v "${PWD}:/workspace" ghcr.io/radityobw/sidik-ml:latest /worksp
 
 ## 📌 Project Overview
 
-**SIDIK-ML** is an independent Python package extending the deterministic [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.4`) security analyzer with **explainable classical Non-Artificial Neural Network (Non-ANN) machine learning** for false-positive reduction in hardcoded secret detection.
+**SIDIK-ML** is an independent Python package extending the deterministic [`SIDIK`](https://github.com/radityobw/SIDIK) (`>=v1.3.4`, unlocking full polyglot SAST and 8-ecosystem offline OSV SCA on `SIDIK >=v1.4.0`) security analyzer with **explainable classical Non-Artificial Neural Network (Non-ANN) machine learning** for false-positive reduction in hardcoded secret detection.
 
 Instead of forking SIDIK's UI or introducing heavy deep learning weights, `SIDIK-ML` integrates through the leak-safe `SecretCandidate` (`schema_version = "1.0.0"`) contract and the standard `sidik.plugins` entry-point group. When launched via `sidik-ml gui`, `sidik-ml interactive`, or `--enable-ml`, the shared UI switches cleanly into an **Amber Orange (`#f59e0b` / `#ea580c`)** identity with `NON-ANN ML` badges, amber-yellow `sidik-ml>` console prompts, and warm orange-themed HTML/Markdown triage dashboards, clearly distinguishing hybrid ML analysis from Core SIDIK's **Ocean Blue (`#3b82f6`)** deterministic edition.
 
@@ -251,11 +257,13 @@ sidik-ml models
 sidik-ml -i --lang en          # or: sidik-ml interactive / python -m sidik_ml -i / run_sidik_ml_cli.bat
 sidik-ml --gui                 # or: sidik-ml gui / sidik-ml-gui / python -m sidik_ml --gui / run_sidik_ml.bat
 
-# Run unified Secret + SCA scan (default Gradient Boosting, or pick preset random_forest / lr / dt / et)
+# Run unified Polyglot Secret + 8-Ecosystem SCA scan (default Gradient Boosting, or pick preset)
 sidik-ml . --fail-on high
 sidik-ml . --model random_forest --fail-on high
 sidik-ml --target path/to/project --include-deps --format html -o ml_report.html --lang en
 sidik-ml --target path/to/project --model custom_model.skops --format html -o ml_report.html --lang en
+sidik-ml db-info
+sidik-ml update-db --ecosystem npm,go,crates
 sidik-ml fetch-model https://example.com/gradient_boosting.skops --sha256 <hex_digest>
 
 # Run tests

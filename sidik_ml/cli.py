@@ -39,6 +39,8 @@ KNOWN_SUBCOMMANDS = {
     "tui",
     "gui",
     "models",
+    "update-db",
+    "db-info",
     "extract-features",
     "verify-model",
     "train",
@@ -47,7 +49,7 @@ KNOWN_SUBCOMMANDS = {
 
 
 def _normalize_argv(raw_argv: List[str]) -> List[str]:
-    """Normalizes symmetric SIDIK-style shorthands (`-i`, `--gui`, `.`, `-t`) into subcommands."""
+    """Normalizes symmetric SIDIK-style shorthands (`-i`, `--gui`, `.`, `-t`, `--update-db`, `--db-info`) into subcommands."""
     if not raw_argv:
         return []
     head = raw_argv[0]
@@ -65,6 +67,14 @@ def _normalize_argv(raw_argv: List[str]) -> List[str]:
 
     if head in ("-h", "--help"):
         return list(raw_argv)
+
+    if "--update-db" in raw_argv:
+        rest = [tok for tok in raw_argv if tok != "--update-db"]
+        return ["update-db", *rest]
+
+    if "--db-info" in raw_argv:
+        rest = [tok for tok in raw_argv if tok != "--db-info"]
+        return ["db-info", *rest]
 
     if (not head.startswith("-")) or ("-t" in raw_argv or "--target" in raw_argv):
         return ["scan", *raw_argv]
@@ -104,14 +114,16 @@ def _add_shared_ml_args(subparser: argparse.ArgumentParser) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sidik-ml",
-        description="SIDIK-ML: Explainable Non-ANN ML Extension for SIDIK Static Security Analysis",
+        description="SIDIK-ML: Explainable Non-ANN ML Extension for SIDIK Polyglot SAST & Multi-Ecosystem SCA",
         epilog=(
             "Examples (symmetric with SIDIK):\n"
             "  sidik-ml models                                    # List all 5 bundled Non-ANN models\n"
             "  sidik-ml -i                                        # Launch Amber-Orange Interactive Console (TUI)\n"
             "  sidik-ml --gui                                     # Launch SIDIK-ML Desktop GUI (alias: sidik-ml gui)\n"
-            "  sidik-ml . --model random_forest                   # Scan using bundled Random Forest preset\n"
-            "  sidik-ml --target . --include-deps --format html   # Full Secret + SCA HTML dashboard\n"
+            "  sidik-ml . --model random_forest                   # Polyglot scan using bundled Random Forest preset\n"
+            "  sidik-ml --target . --include-deps --format html   # Full Polyglot Secret + 8-Ecosystem SCA HTML dashboard\n"
+            "  sidik-ml update-db --ecosystem npm,go,crates       # Sync offline OSV advisories (8 ecosystems or 'all')\n"
+            "  sidik-ml db-info                                   # Show PyPI & multi-ecosystem SQLite advisory stats\n"
             "  sidik-ml train data.jsonl -o artifacts/ --stratified"
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -125,6 +137,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--gui",
         action="store_true",
         help="Launch SIDIK-ML Desktop GUI",
+    )
+    parser.add_argument(
+        "--update-db",
+        action="store_true",
+        help="Download offline Google OSV advisories (PyPI default, or --ecosystem npm,go,crates,all)",
+    )
+    parser.add_argument(
+        "--db-info",
+        action="store_true",
+        help="Show offline OSV advisory database statistics (PyPI + multi-ecosystem SQLite cache)",
     )
     parser.add_argument(
         "--version",
@@ -149,7 +171,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_scan.add_argument(
         "--include-deps",
         action="store_true",
-        help="Include Python dependency manifest scanning (enabled by default in 'all' mode)",
+        help="Include multi-ecosystem dependency manifest scanning across 8 ecosystems (enabled by default in 'all' mode)",
     )
     p_scan.add_argument(
         "--format", "-f",
@@ -176,7 +198,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_scan.add_argument("--no-color", action="store_true", help="Disable ANSI color codes in terminal output")
     p_scan.add_argument("--quiet", "-q", action="store_true", help="Suppress progress and informational notices")
     p_scan.add_argument("--no-step-summary", action="store_true", help="Do not append Markdown summary to $GITHUB_STEP_SUMMARY")
-    p_scan.add_argument("--extensions", default=None, help="Comma-separated extensions for secret scanning")
+    p_scan.add_argument(
+        "--extensions",
+        default=None,
+        help="Comma-separated file extensions for polyglot secret scanning (e.g., '.py,.js,.ts,.go,.rs,.env')",
+    )
     p_scan.add_argument("--exclude", action="append", default=[], help="Glob pattern to exclude (repeatable)")
     p_scan.add_argument("--baseline", default=None, help="Path to JSON baseline file of suppressed finding IDs")
     p_scan.add_argument("--write-baseline", default=None, help="Write current finding IDs to JSON baseline file")
@@ -191,6 +217,32 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_models = sub.add_parser("models", help="List all 5 bundled SHA-256-verified pre-trained Non-ANN models")
     p_models.add_argument("--json", action="store_true", help="Emit JSON output")
+
+    p_upd = sub.add_parser(
+        "update-db",
+        help="Download offline Google OSV advisories via SIDIK (PyPI or 8 ecosystems)",
+    )
+    p_upd.add_argument(
+        "--ecosystem",
+        default="PyPI",
+        help="OSV ecosystem(s): PyPI (default), comma-separated (npm,go,crates,maven,packagist,rubygems,nuget), or 'all'",
+    )
+    p_upd.add_argument(
+        "--db", "--output", "-o",
+        dest="db",
+        default=None,
+        help="Optional custom output path for PyPI JSON advisory snapshot",
+    )
+
+    p_dbi = sub.add_parser(
+        "db-info",
+        help="Show offline OSV advisory database statistics (PyPI + multi-ecosystem SQLite cache)",
+    )
+    p_dbi.add_argument(
+        "--db",
+        default=None,
+        help="Optional path to custom vulnerability database JSON file",
+    )
 
     p_feat = sub.add_parser("extract-features", help="Export leakage-free feature JSONL from target candidates")
     p_feat.add_argument("target", help="File or directory path to inspect")
@@ -291,6 +343,33 @@ def main(argv: Optional[List[str]] = None) -> int:
             ml_suppress_fp=getattr(args, "suppress_fp", False),
             app_brand="SIDIK-ML",
         )
+
+    if args.command == "update-db" or (args.command is None and args.update_db):
+        from sidik.cli import build_arg_parser as build_sidik_parser, run_cli_with_args
+
+        eco = getattr(args, "ecosystem", "PyPI") or "PyPI"
+        fwd = ["--update-db"]
+        if "--ecosystem" in build_sidik_parser()._option_string_actions:
+            fwd.extend(["--ecosystem", eco])
+        elif eco.strip().lower() not in ("pypi", ""):
+            print(
+                f"Error: --ecosystem '{eco}' requires SIDIK >=1.4.0 (installed: v{SIDIK_VERSION}).",
+                file=sys.stderr,
+            )
+            return 2
+        db_opt = getattr(args, "db", None)
+        if db_opt:
+            fwd.extend(["--db", db_opt])
+        return run_cli_with_args(fwd, exit_on_finish=False)
+
+    if args.command == "db-info" or (args.command is None and args.db_info):
+        from sidik.cli import run_cli_with_args
+
+        fwd = ["--db-info"]
+        db_opt = getattr(args, "db", None)
+        if db_opt:
+            fwd.extend(["--db", db_opt])
+        return run_cli_with_args(fwd, exit_on_finish=False)
 
     if args.command is None:
         parser.print_help()

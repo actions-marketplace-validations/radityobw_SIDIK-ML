@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use SIDIK-ML in academic research or DevSecOps pipelines, please cite it using the metadata below."
+title: "SIDIK-ML: Explainable Non-Neural Machine Learning Extension for SIDIK Polyglot Static Security Analysis"
+type: software
+version: "0.5.9"
+date-released: "2026-11-25"
+license: MIT
+repository-code: "https://github.com/radityobw/SIDIK-ML"
+url: "https://radityobw.github.io/SIDIK-ML/"
+authors:
+  - family-names: "Waskito"
+    given-names: "Radityo Budi"
+keywords:
+  - explainable-ai
+  - non-neural
+  - machine-learning
+  - sast
+  - sca
+  - polyglot
+  - secret-detection
+  - false-positive-reduction
+  - osv
+  - sarif

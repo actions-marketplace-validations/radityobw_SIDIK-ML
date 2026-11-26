@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SIDIK-ML - Explainable Non-ANN ML for Polyglot SAST &amp; Secret Triage</title>
+  <meta name="description" content="SIDIK-ML is an explainable classical Non-ANN machine learning extension for SIDIK polyglot SAST and 8-ecosystem OSV SCA with 5 bundled SHA-256 models." />
+  <meta name="keywords" content="SIDIK-ML, explainable AI, non-neural machine learning, polyglot SAST, secret detection, false positive reduction, SCA, OSV, SARIF, scikit-learn" />
+  <meta name="author" content="Radityo Budi Waskito" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://radityobw.github.io/SIDIK-ML/" />
+  <link rel="icon" href="favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/png" href="favicon-48x48.png" sizes="48x48" />
+  <link rel="icon" type="image/png" href="favicon-192x192.png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
+
+  <meta name="google-site-verification" content="6y-5Cff0WkeBj7_uWju39rv0nQnqmEgw81an57VJkGg" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SIDIK-ML" />
+  <meta property="og:title" content="SIDIK-ML - Explainable Non-ANN ML for Polyglot SAST &amp; Secret Triage" />
+  <meta property="og:description" content="5 bundled SHA-256-verified Non-ANN models, 30 leakage-free features, fail-safe CRITICAL protection, polyglot SAST (30+ languages), and 8-ecosystem OSV SCA." />
+  <meta property="og:url" content="https://radityobw.github.io/SIDIK-ML/" />
+  <meta property="og:image" content="https://radityobw.github.io/SIDIK-ML/og-banner.png" />
+  <meta property="og:image:width" content="1280" />
+  <meta property="og:image:height" content="640" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="SIDIK-ML - Explainable Non-ANN ML Extension for SIDIK" />
+  <meta name="twitter:description" content="Reduce static secret false positives offline across 30+ languages with 5 bundled explainable classical ML models." />
+  <meta name="twitter:image" content="https://radityobw.github.io/SIDIK-ML/og-banner.png" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "SIDIK-ML",
+        "alternateName": "SIDIK-ML Non-ANN Security Scanner",
+        "url": "https://radityobw.github.io/SIDIK-ML/"
+      },
+      {
+        "@type": ["SoftwareApplication", "SoftwareSourceCode"],
+        "name": "SIDIK-ML - Explainable Non-ANN ML Extension for SIDIK",
+        "alternateName": "SIDIK-ML",
+        "description": "Explainable classical Non-ANN machine learning extension for SIDIK polyglot SAST and 8-ecosystem OSV SCA featuring 5 bundled SHA-256 portable models and fail-safe CRITICAL triage.",
+        "softwareVersion": "0.5.9",
+        "operatingSystem": "Windows, Linux, macOS",
+        "applicationCategory": "SecurityApplication",
+        "programmingLanguage": ["Python", "JavaScript", "TypeScript", "Go", "Rust", "Java", "PHP", "Ruby", "C#"],
+        "license": "https://opensource.org/licenses/MIT",
+        "author": {
+          "@type": "Person",
+          "name": "Radityo Budi Waskito"
+        },
+        "url": "https://radityobw.github.io/SIDIK-ML/",
+        "codeRepository": "https://github.com/radityobw/SIDIK-ML",
+        "downloadUrl": "https://pypi.org/project/sidik-ml/",
+        "image": "https://radityobw.github.io/SIDIK-ML/og-banner.png",
+        "sameAs": [
+          "https://github.com/radityobw/SIDIK-ML",
+          "https://pypi.org/project/sidik-ml/",
+          "https://github.com/radityobw/SIDIK",
+          "https://radityobw.github.io/SIDIK/"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why does SIDIK-ML enforce classical Non-ANN models instead of deep neural networks?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "SIDIK-ML restricts training and inference to Logistic Regression, Decision Tree, Random Forest, Extra Trees, and Gradient Boosting with validate_non_ann_model_name() rejecting neural architectures, delivering 1.00 ms batch inference latency, lightweight KB-scale JSON artifacts, and transparent per-candidate feature contributions."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does SIDIK-ML work out of the box without training a model first?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. SIDIK-ML bundles all 5 SHA-256-verified portable JSON Non-ANN models (Gradient Boosting default ~46 KB, Random Forest ~172 KB, Extra Trees ~338 KB, Logistic Regression ~2.4 KB, and Decision Tree ~2.2 KB) with zero scikit-learn version skew."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can SIDIK-ML scan non-Python polyglot repositories and dependencies?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Paired with SIDIK >=v1.4.0, sidik-ml scans 30+ language/config extensions and audits dependencies across 8 ecosystems (PyPI, npm, Go, crates.io, Maven, Packagist, RubyGems, NuGet) with update-db and db-info CLI passthroughs."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #120d08;
+      --bg-card: #1b140d;
+      --bg-soft: #261b12;
+      --border: #3a291a;
+      --text: #fef3c7;
+      --muted: #d6c3a5;
+      --accent: #f59e0b;
+      --accent-strong: #ea580c;
+      --blue: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+      background: radial-gradient(circle at top right, #3b1d0a 0%, var(--bg) 48%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: #fbbf24; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 36px 20px 64px; }
+    .hero {
+      background: linear-gradient(145deg, #1b120a 0%, #24160b 100%);
+      border: 1px solid #6b3410;
+      border-radius: 18px;
+      padding: 36px 32px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+    }
+    @media (max-width: 780px) {
+      .hero { grid-template-columns: 1fr; text-align: center; }
+      .cta-row, .pill-row { justify-content: center; }
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #fcd34d;
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-bottom: 12px;
+    }
+    h1 { margin: 0 0 10px; font-size: clamp(28px, 4vw, 42px); line-height: 1.15; color: #fffbeb; }
+    .lead { margin: 0 0 18px; color: #fde68a; font-size: 17px; max-width: 720px; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .pill {
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--bg-soft);
+      border: 1px solid #4c331c;
+      color: #fef3c7;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      border: 1px solid #5c3a1e;
+      color: #fffbeb;
+      background: #271a0e;
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+      border-color: #fbbf24;
+      color: #ffffff;
+    }
+    .btn:hover { text-decoration: none; filter: brightness(1.08); }
+    .logo-box img { width: 156px; max-width: 100%; height: auto; }
+    section { margin-top: 38px; }
+    h2 {
+      font-size: 22px;
+      color: #fffbeb;
+      margin: 0 0 14px;
+      border-left: 4px solid var(--accent);
+      padding-left: 12px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .card h3 { margin: 0 0 6px; font-size: 16px; color: #fbbf24; }
+    .card p { margin: 0; font-size: 14px; color: var(--muted); }
+    pre {
+      background: #0c0805;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      color: #fef3c7;
+      margin: 0;
+    }
+    code { font-family: "Cascadia Code", Consolas, "Courier New", monospace; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 14px;
+    }
+    th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #261b10; color: #fde68a; font-weight: 700; }
+    tr:last-child td { border-bottom: none; }
+    .core-banner {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.14) 0%, rgba(59, 130, 246, 0.08) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .release-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .release-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .release-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .release-tag {
+      font-weight: 700;
+      font-size: 14px;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 2px 10px;
+      border-radius: 999px;
+    }
+    .release-date { font-size: 12.5px; color: var(--muted); }
+    .release-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13.5px; }
+    .release-card li { margin-bottom: 6px; }
+    footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div>
+        <span class="eyebrow">v0.5.9 | Amber Orange | Non-ANN Only | MIT License</span>
+        <h1>SIDIK-ML: Explainable Non-ANN ML Extension</h1>
+        <p class="lead">
+          Independent explainable classical machine learning plugin for <strong>SIDIK</strong> combining <strong>5 bundled SHA-256 portable Non-ANN models</strong>, <strong>30 leakage-free static features</strong>, and fail-safe <code>CRITICAL</code> protection over polyglot SAST (30+ languages) and 8-ecosystem offline OSV SCA.
+        </p>
+        <div class="pill-row">
+          <span class="pill">5 Bundled SHA-256 Models</span>
+          <span class="pill">Zero Deep Learning / Neural Guard</span>
+          <span class="pill">30 Leakage-Free Features</span>
+          <span class="pill">Polyglot + 8-Ecosystem SCA</span>
+          <span class="pill">1.00 ms Batch Inference</span>
+        </div>
+        <div class="badge-row">
+          <a href="https://pypi.org/project/sidik-ml/"><img src="https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b&cacheSeconds=3600" alt="PyPI Version" /></a>
+          <a href="https://github.com/radityobw/SIDIK-ML/releases/latest"><img src="https://img.shields.io/github/v/release/radityobw/SIDIK-ML?label=Release&color=ea580c&cacheSeconds=3600" alt="GitHub Release" /></a>
+          <a href="https://github.com/radityobw/SIDIK-ML/actions/workflows/sidik-ml-ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/radityobw/SIDIK-ML/sidik-ml-ci.yml?label=CI&color=22c55e" alt="CI Status" /></a>
+        </div>
+        <div class="cta-row">
+          <a class="btn primary" href="https://github.com/radityobw/SIDIK-ML">GitHub Repository</a>
+          <a class="btn" href="https://pypi.org/project/sidik-ml/">PyPI Package</a>
+          <a class="btn" href="https://colab.research.google.com/github/radityobw/SIDIK-ML/blob/main/notebooks/quickstart.ipynb">Open in Colab</a>
+          <a class="btn" href="https://radityobw.github.io/SIDIK/">Core SIDIK</a>
+        </div>
+      </div>
+      <div class="logo-box">
+        <img src="logo.png" alt="SIDIK-ML Logo" width="156" height="156" />
+      </div>
+    </header>
+
+    <section>
+      <h2>Architecture &amp; Fail-Safe Design</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>5 Pre-Trained Bundled Models</h3>
+          <p>Ships portable SHA-256 JSON artifacts for Gradient Boosting (default), Random Forest, Extra Trees, Logistic Regression, and Decision Tree with zero scikit-learn skew.</p>
+        </div>
+        <div class="card">
+          <h3>Leakage-Free SecretCandidate Contract</h3>
+          <p>Extracts 30 static features from scan-time evidence via <code>SecretCandidate v1.0.0</code> using masked values and SHA-256 digests without retaining raw secrets.</p>
+        </div>
+        <div class="card">
+          <h3>Fail-Safe Hybrid TriagePolicy</h3>
+          <p>Defaults to advisory scoring (<code>suppress_false_positives=False</code>) and shields <code>CRITICAL</code> detections so real credentials are never silently suppressed.</p>
+        </div>
+        <div class="card">
+          <h3>Polyglot SAST &amp; 8-Ecosystem SCA</h3>
+          <p>Delegates scanning to SIDIK (&gt;=v1.4.0) for 30+ extensions, 19 manifests, and symmetric <code>update-db</code> / <code>db-info</code> offline OSV commands.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>5 Bundled Models &amp; Verified CredData Held-Out Results (N = 64)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Model / Condition</th>
+            <th>Preset Flag</th>
+            <th>5-Fold CV F1</th>
+            <th>Test Precision</th>
+            <th>Test Recall</th>
+            <th>Test F1</th>
+            <th>Test MCC</th>
+            <th>Test FPR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Condition A: SIDIK v1.1.0</strong></td>
+            <td>-</td>
+            <td>-</td>
+            <td>0.8103</td>
+            <td>0.8868</td>
+            <td>0.8468</td>
+            <td>-0.1465</td>
+            <td>1.0000</td>
+          </tr>
+          <tr>
+            <td><strong>Logistic Regression</strong> (~2.4 KB)</td>
+            <td><code>--model lr</code></td>
+            <td>0.8550 +- 0.0444</td>
+            <td><strong>1.0000</strong></td>
+            <td>0.8302</td>
+            <td>0.9072</td>
+            <td>0.6757</td>
+            <td><strong>0.0000</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Decision Tree</strong> (~2.2 KB)</td>
+            <td><code>--model dt</code></td>
+            <td>0.8146 +- 0.1020</td>
+            <td>0.9000</td>
+            <td>0.8491</td>
+            <td>0.8738</td>
+            <td>0.3600</td>
+            <td>0.4545</td>
+          </tr>
+          <tr>
+            <td><strong>Random Forest</strong> (~172 KB)</td>
+            <td><code>--model rf</code></td>
+            <td>0.8949 +- 0.0236</td>
+            <td>0.9298</td>
+            <td><strong>1.0000</strong></td>
+            <td><strong>0.9636</strong></td>
+            <td><strong>0.7692</strong></td>
+            <td>0.3636</td>
+          </tr>
+          <tr>
+            <td><strong>Extra Trees</strong> (~338 KB)</td>
+            <td><code>--model et</code></td>
+            <td>0.8957 +- 0.0408</td>
+            <td>0.9400</td>
+            <td>0.8868</td>
+            <td>0.9126</td>
+            <td>0.5604</td>
+            <td>0.2727</td>
+          </tr>
+          <tr>
+            <td><strong>Gradient Boosting (Default / CV)</strong> (~46 KB)</td>
+            <td><code>--model gb</code></td>
+            <td><strong>0.9028 +- 0.0249</strong></td>
+            <td>0.9038</td>
+            <td>0.8868</td>
+            <td>0.8952</td>
+            <td>+0.4178</td>
+            <td>0.4545</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:13.5px; color:var(--muted); margin-top:10px;">
+        External generalization: Across 25 external repositories (1,193 Python files), flags <strong>35.0% (7/20)</strong> deterministic alerts as false positives with <strong>+3.6 ms (+0.15%)</strong> latency overhead. Under zero-shot domain shift on <strong>CredDetX</strong> (1,094 candidates), Hybrid Condition C1 preserves <strong>F1 = 0.7969</strong> and <strong>MCC = +0.2075</strong>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Quick Start</h2>
+      <pre><code># Global install from PyPI (Core SIDIK is installed automatically)
+pip install sidik-ml
+pip install "sidik-ml[gui]"
+
+# Inspect all 5 bundled Non-ANN models and scan polyglot projects
+sidik-ml models
+sidik-ml . --fail-on high
+sidik-ml . --model random_forest --format html -o ml_report.html
+
+# Sync 8-ecosystem OSV caches and launch Amber Orange TUI / GUI
+sidik-ml db-info
+sidik-ml update-db --ecosystem npm,go,crates
+sidik-ml --gui</code></pre>
+    </section>
+
+    <section>
+      <div class="core-banner">
+        <div>
+          <strong style="color:var(--blue); font-size:17px;">Powered by SIDIK Deterministic Core (&gt;=v1.4.0)</strong>
+          <p style="margin:6px 0 0; color:#cbd5e1; font-size:14px;">
+            Explore the core scanner architecture, 12 regex rules, 30+ polyglot file extensions, and 19 SCA manifest parsers on the SIDIK documentation page.
+          </p>
+        </div>
+        <a class="btn" style="border-color:#38bdf8; color:#bae6fd;" href="https://radityobw.github.io/SIDIK/">View SIDIK Core</a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Latest Releases (Auto-Synced from CHANGELOG.md)</h2>
+      <div class="release-grid">
+        <!-- AUTO_CHANGELOG_START -->
+        <article class="release-card">
+          <div class="release-head">
+            <span class="release-tag">v0.5.9</span>
+            <span class="release-date">2026-11-25</span>
+          </div>
+          <ul>
+            <li>CLI symmetry for polyglot SAST &amp; 8-ecosystem OSV SCA (update-db, db-info, action.yml, and integration tests).</li>
+          </ul>
+        </article>
+        <!-- AUTO_CHANGELOG_END -->
+      </div>
+    </section>
+
+    <footer>
+      <span>SIDIK-ML - Author: Radityo Budi Waskito - MIT License - <!-- AUTO_UPDATED_START -->Updated 2026-11-25<!-- AUTO_UPDATED_END --></span>
+      <span><a href="https://github.com/radityobw/SIDIK-ML">GitHub</a> | <a href="https://pypi.org/project/sidik-ml/">PyPI</a> | <a href="https://radityobw.github.io/SIDIK/">SIDIK Core</a></span>
+    </footer>
+  </div>
+</body>
+</html>
