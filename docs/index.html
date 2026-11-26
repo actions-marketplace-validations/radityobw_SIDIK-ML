@@ -33,6 +33,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script>(function(){try{var t=localStorage.getItem('radityobw_theme');document.documentElement.dataset.theme=(t==='light')?'light':'dark';}catch(e){document.documentElement.dataset.theme='dark';}})();</script>
 
   <script type="importmap">
   {
@@ -118,18 +119,53 @@
 
   <style>
     :root {
-      --bg: #fbfbfd;
-      --surface: #ffffff;
-      --surface-2: #f5f5f7;
-      --hairline: rgba(0, 0, 0, 0.08);
-      --text: #1d1d1f;
-      --muted: #6e6e73;
-      --blue: #0071e3;
-      --amber: #d97706;
-      --emerald: #1f8a5b;
+      --bg: #000000;
+      --topbar-bg: rgba(0, 0, 0, 0.72);
+      --surface: #141312;
+      --surface-2: #1c1a18;
+      --hairline: rgba(255, 255, 255, 0.10);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f5f5f7;
+      --heading: #ffffff;
+      --lead: #c2bcb2;
+      --muted: #86868b;
+      --blue: #0a84ff;
+      --blue-hover: #2994ff;
+      --amber: #f59e0b;
+      --amber-pill: rgba(245, 158, 11, 0.16);
+      --emerald: #30d158;
+      --btn-bg: rgba(255, 255, 255, 0.07);
+      --btn-hover: rgba(255, 255, 255, 0.13);
+      --code-bg: #11100f;
+      --code-text: #f5f5f7;
+      --stage-bg: radial-gradient(ellipse 68% 66% at 50% 48%, #363026 0%, #1b1814 48%, #0d0c0a 80%, #060605 100%);
+      --stage-pill: rgba(255, 255, 255, 0.09);
       --mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
       --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
       --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", sans-serif;
+    }
+    html[data-theme="light"] {
+      --bg: #fbfbfd;
+      --topbar-bg: rgba(251, 251, 253, 0.80);
+      --surface: #ffffff;
+      --surface-2: #f5f5f7;
+      --hairline: rgba(0, 0, 0, 0.08);
+      --card-border: rgba(0, 0, 0, 0.06);
+      --text: #1d1d1f;
+      --heading: #1d1d1f;
+      --lead: #424245;
+      --muted: #6e6e73;
+      --blue: #0071e3;
+      --blue-hover: #0077ed;
+      --amber: #d97706;
+      --amber-pill: rgba(217, 119, 6, 0.12);
+      --emerald: #1f8a5b;
+      --btn-bg: rgba(0, 0, 0, 0.05);
+      --btn-hover: rgba(0, 0, 0, 0.09);
+      --code-bg: #1d1d1f;
+      --code-text: #f5f5f7;
+      --stage-bg: radial-gradient(circle at 50% 45%, #ffffff 0%, #f5f2ec 76%, #ece7dd 100%);
+      --stage-pill: rgba(255, 255, 255, 0.86);
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -139,8 +175,10 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.58;
+      overflow-x: clip;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      transition: background-color 0.22s ease, color 0.22s ease;
     }
     a { color: var(--blue); text-decoration: none; }
     a:hover { text-decoration: underline; }
@@ -167,17 +205,17 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      height: 52px;
-      background: rgba(251, 251, 253, 0.8);
+      min-height: 52px;
+      background: var(--topbar-bg);
       backdrop-filter: saturate(180%) blur(20px);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       border-bottom: 1px solid var(--hairline);
     }
     .topbar-inner {
-      max-width: 1180px;
-      height: 100%;
+      max-width: 1220px;
+      min-height: 52px;
       margin: 0 auto;
-      padding: 0 28px;
+      padding: 10px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -193,6 +231,7 @@
       font-weight: 600;
       font-size: 14px;
       letter-spacing: -0.01em;
+      white-space: nowrap;
     }
     .brand-mark:hover { text-decoration: none; }
     .brand-dot {
@@ -201,29 +240,49 @@
       border-radius: 50%;
       background: var(--amber);
       display: inline-block;
+      flex-shrink: 0;
     }
-    .topbar-nav { display: flex; flex-wrap: wrap; gap: 24px; }
-    .topbar-nav a { color: var(--muted); font-weight: 500; transition: color 0.15s ease; }
+    .topbar-nav { display: flex; align-items: center; gap: 20px; }
+    .topbar-nav a { color: var(--muted); font-weight: 500; white-space: nowrap; transition: color 0.15s ease; }
     .topbar-nav a:hover { color: var(--text); text-decoration: none; }
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 980px;
+      border: 1px solid var(--hairline);
+      background: var(--btn-bg);
+      color: var(--text);
+      cursor: pointer;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background 0.15s ease;
+    }
+    .theme-btn:hover { background: var(--btn-hover); }
+    .theme-btn svg { width: 15px; height: 15px; display: block; }
+    html[data-theme="dark"] .icon-moon { display: none; }
+    html[data-theme="light"] .icon-sun { display: none; }
 
-    .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 28px 84px; }
+    .wrap { max-width: 1220px; margin: 0 auto; padding: 56px 28px 84px; }
     .dossier-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
-      gap: 56px;
+      grid-template-columns: minmax(0, 1.18fr) minmax(350px, 0.82fr);
+      gap: 48px;
       align-items: start;
     }
-    .vitrine-col { position: sticky; top: 84px; order: 2; }
-    .chapters-col { order: 1; min-width: 0; }
+    .vitrine-col { position: sticky; top: 84px; order: 2; min-width: 0; }
+    .chapters-col { order: 1; min-width: 0; max-width: 100%; }
 
     #stage-3d {
       position: relative;
       height: min(560px, calc(100vh - 120px));
-      min-height: 420px;
-      background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f5f2ec 76%, #ece7dd 100%);
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      min-height: 400px;
+      background: var(--stage-bg);
+      border: 1px solid var(--card-border);
       border-radius: 28px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 24px 56px rgba(0, 0, 0, 0.35);
       overflow: hidden;
       cursor: grab;
       user-select: none;
@@ -246,9 +305,9 @@
       z-index: 4;
     }
     #stage-chapter {
-      background: rgba(255, 255, 255, 0.86);
+      background: var(--stage-pill);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--hairline);
       color: var(--text);
       padding: 4px 12px;
       border-radius: 980px;
@@ -291,9 +350,11 @@
     #stage-3d.is-ready .stage-fallback { display: none; }
 
     .chapter {
-      padding-bottom: 64px;
-      margin-bottom: 64px;
+      padding-bottom: 60px;
+      margin-bottom: 60px;
       border-bottom: 1px solid var(--hairline);
+      min-width: 0;
+      max-width: 100%;
     }
     .chapter:last-child {
       border-bottom: none;
@@ -312,13 +373,14 @@
     h1 {
       font-family: var(--display);
       margin: 0 0 16px;
-      font-size: clamp(34px, 4.4vw, 52px);
+      font-size: clamp(32px, 4.2vw, 50px);
       font-weight: 700;
       line-height: 1.06;
       letter-spacing: -0.035em;
-      color: var(--text);
+      color: var(--heading);
+      overflow-wrap: break-word;
     }
-    .lead { margin: 0 0 24px; color: #424245; font-size: 17px; line-height: 1.55; max-width: 620px; }
+    .lead { margin: 0 0 24px; color: var(--lead); font-size: 17px; line-height: 1.55; max-width: 640px; }
     .spec-meta {
       margin: 0 0 26px;
       font-size: 13.5px;
@@ -333,70 +395,85 @@
       border-radius: 980px;
       font-weight: 500;
       font-size: 14px;
-      border: 1px solid transparent;
+      border: 1px solid var(--hairline);
       color: var(--text);
-      background: rgba(0, 0, 0, 0.045);
+      background: var(--btn-bg);
       transition: background 0.15s ease;
     }
     .btn.primary {
       background: var(--blue);
+      border-color: var(--blue);
       color: #ffffff;
       font-weight: 600;
     }
-    .btn:hover { text-decoration: none; background: rgba(0, 0, 0, 0.09); }
-    .btn.primary:hover { background: #0077ed; }
+    .btn:hover { text-decoration: none; background: var(--btn-hover); }
+    .btn.primary:hover { background: var(--blue-hover); border-color: var(--blue-hover); }
 
     h2 {
       font-family: var(--display);
       font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.025em;
-      color: var(--text);
+      color: var(--heading);
       margin: 0 0 18px;
+      overflow-wrap: break-word;
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 16px;
+      min-width: 0;
     }
     .card {
       background: var(--surface);
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--card-border);
       border-radius: 24px;
       padding: 24px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: break-word;
     }
     .card h3 { font-family: var(--display); margin: 0 0 8px; font-size: 17px; font-weight: 600; letter-spacing: -0.015em; color: var(--text); }
-    .card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.55; }
+    .card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.55; overflow-wrap: break-word; }
+    :not(pre) > code { overflow-wrap: anywhere; word-break: break-word; font-size: 0.9em; }
     pre {
-      background: #1d1d1f;
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
       border-radius: 18px;
       padding: 20px 22px;
+      max-width: 100%;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       font-size: 13px;
       line-height: 1.65;
-      color: #f5f5f7;
+      color: var(--code-text);
       margin: 0;
     }
     code { font-family: var(--mono); }
-    table {
+    pre code { white-space: pre; word-break: normal; overflow-wrap: normal; }
+    .table-wrap {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 20px;
+      border: 1px solid var(--hairline);
+      background: var(--surface);
+    }
+    .table-wrap table {
       width: 100%;
       border-collapse: collapse;
-      background: var(--surface);
-      border: 1px solid rgba(0, 0, 0, 0.07);
-      border-radius: 20px;
-      overflow: hidden;
-      font-size: 13.5px;
+      font-size: 12.5px;
       font-variant-numeric: tabular-nums;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
-    th, td { padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--hairline); }
-    th { background: var(--surface-2); color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    th, td { padding: 10px 10px; text-align: left; border-bottom: 1px solid var(--hairline); }
+    th { background: var(--surface-2); color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+    td:not(:first-child) { white-space: nowrap; }
     tr:last-child td { border-bottom: none; }
     .core-banner {
       margin-top: 26px;
       background: var(--surface);
-      border: 1px solid rgba(0, 113, 227, 0.22);
+      border: 1px solid var(--hairline);
       border-radius: 24px;
       padding: 24px 26px;
       display: flex;
@@ -404,24 +481,30 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      min-width: 0;
+      max-width: 100%;
     }
     .release-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: 1fr;
       gap: 16px;
+      min-width: 0;
     }
     .release-card {
       background: var(--surface);
-      border: 1px solid rgba(0, 0, 0, 0.06);
+      border: 1px solid var(--card-border);
       border-radius: 24px;
       padding: 22px 24px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      min-width: 0;
+      max-width: 100%;
+      overflow-wrap: break-word;
     }
     .release-head {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
       margin-bottom: 12px;
     }
     .release-tag {
@@ -429,13 +512,13 @@
       font-weight: 600;
       font-size: 12.5px;
       color: var(--amber);
-      background: rgba(217, 119, 6, 0.12);
+      background: var(--amber-pill);
       padding: 3px 11px;
       border-radius: 980px;
     }
     .release-date { font-family: var(--mono); font-size: 12px; color: var(--muted); }
     .release-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
-    .release-card li { margin-bottom: 6px; }
+    .release-card li { margin-bottom: 6px; overflow-wrap: anywhere; }
     footer {
       margin-top: 40px;
       padding-top: 24px;
@@ -453,6 +536,12 @@
       .chapters-col { order: 2; }
       #stage-3d { height: 360px; min-height: 300px; }
     }
+    @media (max-width: 640px) {
+      .wrap { padding: 32px 18px 64px; }
+      .topbar-inner { padding: 10px 16px; gap: 10px; }
+      .topbar-nav { gap: 12px; font-size: 12px; }
+      .topbar-nav a:nth-child(n+4) { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -466,6 +555,10 @@
         <a href="#sec-benchmarks">Benchmarks</a>
         <a href="#sec-cli">CLI</a>
         <a href="https://radityobw.github.io/SIDIK/">SIDIK Core</a>
+        <button id="theme-toggle" class="theme-btn" type="button" aria-label="Toggle light or dark theme" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
       </div>
     </div>
   </nav>
@@ -514,82 +607,84 @@
 
         <section class="chapter" data-chapter="benchmarks" id="sec-benchmarks">
           <h2>5 Bundled Models &amp; CredData Results (N = 64)</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Model / Condition</th>
-                <th>Preset Flag</th>
-                <th>5-Fold CV F1</th>
-                <th>Test Precision</th>
-                <th>Test Recall</th>
-                <th>Test F1</th>
-                <th>Test MCC</th>
-                <th>Test FPR</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Condition A: SIDIK v1.1.0</strong></td>
-                <td>-</td>
-                <td>-</td>
-                <td>0.8103</td>
-                <td>0.8868</td>
-                <td>0.8468</td>
-                <td>-0.1465</td>
-                <td>1.0000</td>
-              </tr>
-              <tr>
-                <td><strong>Logistic Regression</strong> (~2.4 KB)</td>
-                <td><code>--model lr</code></td>
-                <td>0.8550 +- 0.0444</td>
-                <td><strong>1.0000</strong></td>
-                <td>0.8302</td>
-                <td>0.9072</td>
-                <td>0.6757</td>
-                <td><strong>0.0000</strong></td>
-              </tr>
-              <tr>
-                <td><strong>Decision Tree</strong> (~2.2 KB)</td>
-                <td><code>--model dt</code></td>
-                <td>0.8146 +- 0.1020</td>
-                <td>0.9000</td>
-                <td>0.8491</td>
-                <td>0.8738</td>
-                <td>0.3600</td>
-                <td>0.4545</td>
-              </tr>
-              <tr>
-                <td><strong>Random Forest</strong> (~172 KB)</td>
-                <td><code>--model rf</code></td>
-                <td>0.8949 +- 0.0236</td>
-                <td>0.9298</td>
-                <td><strong>1.0000</strong></td>
-                <td><strong>0.9636</strong></td>
-                <td><strong>0.7692</strong></td>
-                <td>0.3636</td>
-              </tr>
-              <tr>
-                <td><strong>Extra Trees</strong> (~338 KB)</td>
-                <td><code>--model et</code></td>
-                <td>0.8957 +- 0.0408</td>
-                <td>0.9400</td>
-                <td>0.8868</td>
-                <td>0.9126</td>
-                <td>0.5604</td>
-                <td>0.2727</td>
-              </tr>
-              <tr>
-                <td><strong>Gradient Boosting (Default / CV)</strong> (~46 KB)</td>
-                <td><code>--model gb</code></td>
-                <td><strong>0.9028 +- 0.0249</strong></td>
-                <td>0.9038</td>
-                <td>0.8868</td>
-                <td>0.8952</td>
-                <td>+0.4178</td>
-                <td>0.4545</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model / Condition</th>
+                  <th>Preset Flag</th>
+                  <th>5-Fold CV F1</th>
+                  <th>Test Precision</th>
+                  <th>Test Recall</th>
+                  <th>Test F1</th>
+                  <th>Test MCC</th>
+                  <th>Test FPR</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Condition A: SIDIK v1.1.0</strong></td>
+                  <td>-</td>
+                  <td>-</td>
+                  <td>0.8103</td>
+                  <td>0.8868</td>
+                  <td>0.8468</td>
+                  <td>-0.1465</td>
+                  <td>1.0000</td>
+                </tr>
+                <tr>
+                  <td><strong>Logistic Regression</strong> (~2.4 KB)</td>
+                  <td><code>--model lr</code></td>
+                  <td>0.8550 +- 0.0444</td>
+                  <td><strong>1.0000</strong></td>
+                  <td>0.8302</td>
+                  <td>0.9072</td>
+                  <td>0.6757</td>
+                  <td><strong>0.0000</strong></td>
+                </tr>
+                <tr>
+                  <td><strong>Decision Tree</strong> (~2.2 KB)</td>
+                  <td><code>--model dt</code></td>
+                  <td>0.8146 +- 0.1020</td>
+                  <td>0.9000</td>
+                  <td>0.8491</td>
+                  <td>0.8738</td>
+                  <td>0.3600</td>
+                  <td>0.4545</td>
+                </tr>
+                <tr>
+                  <td><strong>Random Forest</strong> (~172 KB)</td>
+                  <td><code>--model rf</code></td>
+                  <td>0.8949 +- 0.0236</td>
+                  <td>0.9298</td>
+                  <td><strong>1.0000</strong></td>
+                  <td><strong>0.9636</strong></td>
+                  <td><strong>0.7692</strong></td>
+                  <td>0.3636</td>
+                </tr>
+                <tr>
+                  <td><strong>Extra Trees</strong> (~338 KB)</td>
+                  <td><code>--model et</code></td>
+                  <td>0.8957 +- 0.0408</td>
+                  <td>0.9400</td>
+                  <td>0.8868</td>
+                  <td>0.9126</td>
+                  <td>0.5604</td>
+                  <td>0.2727</td>
+                </tr>
+                <tr>
+                  <td><strong>Gradient Boosting (Default / CV)</strong> (~46 KB)</td>
+                  <td><code>--model gb</code></td>
+                  <td><strong>0.9028 +- 0.0249</strong></td>
+                  <td>0.9038</td>
+                  <td>0.8868</td>
+                  <td>0.8952</td>
+                  <td>+0.4178</td>
+                  <td>0.4545</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <p style="font-size:14px; color:var(--muted); margin-top:14px;">
             External generalization: Across 25 external repositories (1,193 Python files), flags <strong>35.0% (7/20)</strong> deterministic alerts as false positives with <strong>+3.6 ms (+0.15%)</strong> latency overhead. Under zero-shot domain shift on <strong>CredDetX</strong> (1,094 candidates), Hybrid Condition C1 preserves <strong>F1 = 0.7969</strong> and <strong>MCC = +0.2075</strong>.
           </p>
@@ -613,7 +708,7 @@ sidik-ml --gui</code></pre>
 
           <div class="core-banner">
             <div>
-              <strong style="color:var(--text); font-size:17px;">Powered by SIDIK Deterministic Core (&gt;=v1.4.0)</strong>
+              <strong style="color:var(--heading); font-size:17px;">Powered by SIDIK Deterministic Core (&gt;=v1.4.0)</strong>
               <p style="margin:6px 0 0; color:var(--muted); font-size:14px;">
                 Explore the core scanner architecture, 12 regex rules, 30+ polyglot file extensions, and 19 SCA manifest parsers on the SIDIK documentation page.
               </p>
@@ -662,6 +757,17 @@ sidik-ml --gui</code></pre>
     </footer>
   </div>
 
+  <script>
+    (function(){
+      var btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      btn.addEventListener('click', function(){
+        var next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('radityobw_theme', next); } catch(e) {}
+      });
+    })();
+  </script>
   <script type="module" src="scene3d.js"></script>
 </body>
 </html>

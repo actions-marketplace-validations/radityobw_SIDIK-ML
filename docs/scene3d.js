@@ -98,9 +98,31 @@ function initShowcase() {
   amberRim.position.set(2.8, 2.2, -3.0);
   scene.add(amberRim);
 
-  const cobaltRim = new THREE.DirectionalLight(0x2563eb, 0.75);
+  const cobaltRim = new THREE.DirectionalLight(0x2563eb, 1.15);
   cobaltRim.position.set(-2.9, -1.2, -2.6);
   scene.add(cobaltRim);
+
+  function applyTheme() {
+    const isLight = document.documentElement.dataset.theme === 'light';
+    if (isLight) {
+      renderer.toneMappingExposure = 1.04;
+      scene.environmentIntensity = 0.52;
+      keyLight.intensity = 1.35;
+      amberRim.intensity = 6.0;
+      cobaltRim.intensity = 0.75;
+    } else {
+      renderer.toneMappingExposure = 1.1;
+      scene.environmentIntensity = 0.82;
+      keyLight.intensity = 2.0;
+      amberRim.intensity = 8.5;
+      cobaltRim.intensity = 1.15;
+    }
+  }
+  applyTheme();
+  new MutationObserver(applyTheme).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme'],
+  });
 
   const pivot = new THREE.Group();
   scene.add(pivot);
