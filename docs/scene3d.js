@@ -11,11 +11,11 @@ const KEYFRAMES = [
 ];
 
 const CHAPTER_LABELS = {
-  overview: '01 / OVERVIEW',
-  architecture: '02 / NON-ANN ENGINE',
-  benchmarks: '03 / EMPIRICAL TABLE',
-  cli: '04 / CLI & INTEGRATION',
-  releases: '05 / RELEASES',
+  overview: '01 Overview',
+  architecture: '02 Non-ANN Engine',
+  benchmarks: '03 Empirical Table',
+  cli: '04 CLI',
+  releases: '05 Releases',
 };
 
 const MESH_EXPLODE_OFFSETS = {
@@ -80,25 +80,25 @@ function initShowcase() {
 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.04;
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.9;
+  scene.environmentIntensity = 0.52;
 
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 40);
   camera.position.set(0, 0.02, 4.15);
 
-  const keyLight = new THREE.DirectionalLight(0xfff5e8, 2.2);
+  const keyLight = new THREE.DirectionalLight(0xfffcf7, 1.35);
   keyLight.position.set(3.2, 4.2, 5.0);
   scene.add(keyLight);
 
-  const amberRim = new THREE.SpotLight(0xf59e0b, 12.0, 18, Math.PI / 3.0, 0.55, 1.1);
+  const amberRim = new THREE.SpotLight(0xd97706, 6.5, 18, Math.PI / 3.0, 0.55, 1.1);
   amberRim.position.set(2.8, 2.2, -3.0);
   scene.add(amberRim);
 
-  const cobaltRim = new THREE.DirectionalLight(0x3b82f6, 1.25);
+  const cobaltRim = new THREE.DirectionalLight(0x2563eb, 0.75);
   cobaltRim.position.set(-2.9, -1.2, -2.6);
   scene.add(cobaltRim);
 

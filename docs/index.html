@@ -32,7 +32,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
   <script type="importmap">
   {
@@ -118,36 +118,31 @@
 
   <style>
     :root {
-      --bg: #0c0a08;
-      --surface: #15110d;
-      --surface-2: #1f1912;
-      --border: #292118;
-      --border-strong: #463626;
-      --text: #f5efe6;
-      --muted: #b6a693;
-      --amber: #f59e0b;
-      --cobalt: #2563eb;
-      --emerald: #10b981;
-      --blue-bright: #38bdf8;
-      --mono: "JetBrains Mono", Consolas, monospace;
-      --display: "Space Grotesk", sans-serif;
-      --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      --bg: #fbfbfd;
+      --surface: #ffffff;
+      --surface-2: #f5f5f7;
+      --hairline: rgba(0, 0, 0, 0.08);
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --blue: #0071e3;
+      --amber: #d97706;
+      --emerald: #1f8a5b;
+      --mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
+      --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", sans-serif;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: var(--sans);
-      background-color: var(--bg);
-      background-image:
-        linear-gradient(to right, rgba(245, 158, 11, 0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(245, 158, 11, 0.03) 1px, transparent 1px);
-      background-size: 56px 56px;
+      background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.58;
       -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
-    a { color: #fbbf24; text-decoration: none; }
+    a { color: var(--blue); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     .progress-track {
@@ -156,14 +151,14 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: rgba(255, 255, 255, 0.06);
+      background: transparent;
       z-index: 60;
       pointer-events: none;
     }
     #scroll-progress-bar {
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, var(--amber) 0%, var(--emerald) 100%);
+      background: var(--amber);
       transform-origin: left center;
       transform: scaleX(0);
     }
@@ -172,94 +167,96 @@
       position: sticky;
       top: 0;
       z-index: 40;
-      background: rgba(12, 10, 8, 0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
+      height: 52px;
+      background: rgba(251, 251, 253, 0.8);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--hairline);
     }
     .topbar-inner {
-      max-width: 1240px;
+      max-width: 1180px;
+      height: 100%;
       margin: 0 auto;
-      padding: 12px 24px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      font-family: var(--mono);
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
     }
     .brand-mark {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       color: var(--text);
       font-weight: 600;
-      letter-spacing: 0.06em;
+      font-size: 14px;
+      letter-spacing: -0.01em;
     }
-    .brand-diamond {
-      width: 9px;
-      height: 9px;
+    .brand-mark:hover { text-decoration: none; }
+    .brand-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
       background: var(--amber);
-      transform: rotate(45deg);
       display: inline-block;
     }
-    .topbar-nav { display: flex; flex-wrap: wrap; gap: 18px; }
-    .topbar-nav a { color: var(--muted); }
+    .topbar-nav { display: flex; flex-wrap: wrap; gap: 24px; }
+    .topbar-nav a { color: var(--muted); font-weight: 500; transition: color 0.15s ease; }
     .topbar-nav a:hover { color: var(--text); text-decoration: none; }
 
-    .wrap { max-width: 1240px; margin: 0 auto; padding: 36px 24px 72px; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 28px 84px; }
     .dossier-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.16fr) minmax(350px, 0.84fr);
-      gap: 40px;
+      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+      gap: 56px;
       align-items: start;
     }
-    .vitrine-col { position: sticky; top: 74px; order: 2; }
+    .vitrine-col { position: sticky; top: 84px; order: 2; }
     .chapters-col { order: 1; min-width: 0; }
 
     #stage-3d {
       position: relative;
-      height: min(540px, calc(100vh - 110px));
-      min-height: 400px;
-      background: radial-gradient(circle at 50% 45%, #23190f 0%, #0e0b09 74%);
-      border: 1px solid var(--border);
+      height: min(560px, calc(100vh - 120px));
+      min-height: 420px;
+      background: radial-gradient(circle at 50% 45%, #ffffff 0%, #f5f2ec 76%, #ece7dd 100%);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 28px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
       overflow: hidden;
       cursor: grab;
       user-select: none;
       touch-action: pan-y;
     }
     #stage-3d:active { cursor: grabbing; }
-    .hud-corner {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      pointer-events: none;
-      z-index: 4;
-    }
-    .hud-corner.tl { top: 10px; left: 10px; border-top: 2px solid var(--amber); border-left: 2px solid var(--amber); }
-    .hud-corner.tr { top: 10px; right: 10px; border-top: 1px solid var(--border-strong); border-right: 1px solid var(--border-strong); }
-    .hud-corner.bl { bottom: 10px; left: 10px; border-bottom: 1px solid var(--border-strong); border-left: 1px solid var(--border-strong); }
-    .hud-corner.br { bottom: 10px; right: 10px; border-bottom: 2px solid var(--emerald); border-right: 2px solid var(--emerald); }
 
     .stage-hud-top {
       position: absolute;
-      top: 18px;
+      top: 20px;
       left: 22px;
       right: 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.08em;
+      font-size: 12px;
+      font-weight: 500;
       color: var(--muted);
       pointer-events: none;
       z-index: 4;
     }
-    #stage-chapter { color: var(--amber); font-weight: 600; }
+    #stage-chapter {
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      color: var(--text);
+      padding: 4px 12px;
+      border-radius: 980px;
+      font-weight: 600;
+    }
     .stage-hud-bottom {
       position: absolute;
-      bottom: 16px;
+      bottom: 18px;
       left: 22px;
       right: 22px;
       display: flex;
@@ -271,7 +268,7 @@
       pointer-events: none;
       z-index: 4;
     }
-    #stage-explode { color: var(--emerald); }
+    #stage-explode { color: var(--emerald); font-weight: 600; }
     #canvas-3d {
       position: relative;
       z-index: 2;
@@ -290,14 +287,13 @@
       height: 164px;
       object-fit: contain;
       z-index: 1;
-      transition: opacity 0.45s ease;
     }
     #stage-3d.is-ready .stage-fallback { display: none; }
 
     .chapter {
-      padding-bottom: 52px;
-      margin-bottom: 52px;
-      border-bottom: 1px solid var(--border);
+      padding-bottom: 64px;
+      margin-bottom: 64px;
+      border-bottom: 1px solid var(--hairline);
     }
     .chapter:last-child {
       border-bottom: none;
@@ -306,80 +302,80 @@
     }
     .eyebrow {
       display: inline-block;
-      font-family: var(--mono);
-      font-size: 11.5px;
+      font-size: 12px;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #fcd34d;
-      border-left: 2px solid var(--amber);
-      padding-left: 10px;
-      margin-bottom: 14px;
+      color: var(--amber);
+      margin-bottom: 12px;
     }
     h1 {
       font-family: var(--display);
-      margin: 0 0 12px;
-      font-size: clamp(28px, 4vw, 44px);
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      color: #fffbeb;
-    }
-    .lead { margin: 0 0 20px; color: #e5d8c5; font-size: 16px; max-width: 680px; }
-    .pill-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
-    .pill {
-      font-family: var(--mono);
-      font-size: 11.5px;
-      background: var(--surface);
-      border: 1px solid var(--border-strong);
+      margin: 0 0 16px;
+      font-size: clamp(34px, 4.4vw, 52px);
+      font-weight: 700;
+      line-height: 1.06;
+      letter-spacing: -0.035em;
       color: var(--text);
-      padding: 4px 10px;
     }
-    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .lead { margin: 0 0 24px; color: #424245; font-size: 17px; line-height: 1.55; max-width: 620px; }
+    .spec-meta {
+      margin: 0 0 26px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
     .cta-row { display: flex; flex-wrap: wrap; gap: 10px; }
     .btn {
-      display: inline-block;
-      padding: 10px 18px;
-      font-weight: 600;
-      font-size: 13.5px;
-      border: 1px solid var(--border-strong);
-      color: #fffbeb;
-      background: var(--surface-2);
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 20px;
+      border-radius: 980px;
+      font-weight: 500;
+      font-size: 14px;
+      border: 1px solid transparent;
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.045);
+      transition: background 0.15s ease;
     }
     .btn.primary {
-      background: var(--amber);
-      border-color: var(--amber);
-      color: #0c0a08;
-      font-weight: 700;
+      background: var(--blue);
+      color: #ffffff;
+      font-weight: 600;
     }
-    .btn:hover { text-decoration: none; border-color: var(--text); }
+    .btn:hover { text-decoration: none; background: rgba(0, 0, 0, 0.09); }
+    .btn.primary:hover { background: #0077ed; }
 
     h2 {
       font-family: var(--display);
-      font-size: 21px;
-      color: #fffbeb;
-      margin: 0 0 16px;
-      border-left: 3px solid var(--amber);
-      padding-left: 12px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      margin: 0 0 18px;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
     }
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 18px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
-    .card h3 { font-family: var(--display); margin: 0 0 6px; font-size: 15.5px; color: #fbbf24; }
-    .card p { margin: 0; font-size: 13.8px; color: var(--muted); }
+    .card h3 { font-family: var(--display); margin: 0 0 8px; font-size: 17px; font-weight: 600; letter-spacing: -0.015em; color: var(--text); }
+    .card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.55; }
     pre {
-      background: #060504;
-      border: 1px solid var(--border);
-      padding: 16px 18px;
+      background: #1d1d1f;
+      border-radius: 18px;
+      padding: 20px 22px;
       overflow-x: auto;
       font-size: 13px;
-      color: var(--text);
+      line-height: 1.65;
+      color: #f5f5f7;
       margin: 0;
     }
     code { font-family: var(--mono); }
@@ -387,69 +383,75 @@
       width: 100%;
       border-collapse: collapse;
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 20px;
+      overflow: hidden;
       font-size: 13.5px;
       font-variant-numeric: tabular-nums;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
-    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-    th { background: var(--surface-2); color: #fde68a; font-family: var(--mono); font-size: 11px; text-transform: uppercase; }
+    th, td { padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--hairline); }
+    th { background: var(--surface-2); color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
     tr:last-child td { border-bottom: none; }
     .core-banner {
-      margin-top: 22px;
+      margin-top: 26px;
       background: var(--surface);
-      border: 1px solid var(--cobalt);
-      padding: 20px 22px;
+      border: 1px solid rgba(0, 113, 227, 0.22);
+      border-radius: 24px;
+      padding: 24px 26px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
     .release-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 14px;
+      gap: 16px;
     }
     .release-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 18px 20px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 24px;
+      padding: 22px 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
     .release-head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
     .release-tag {
       font-family: var(--mono);
       font-weight: 600;
-      font-size: 13px;
-      color: #fbbf24;
-      background: rgba(245, 158, 11, 0.14);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      padding: 2px 10px;
+      font-size: 12.5px;
+      color: var(--amber);
+      background: rgba(217, 119, 6, 0.12);
+      padding: 3px 11px;
+      border-radius: 980px;
     }
     .release-date { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-    .release-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13.5px; }
+    .release-card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
     .release-card li { margin-bottom: 6px; }
     footer {
       margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
+      padding-top: 24px;
+      border-top: 1px solid var(--hairline);
       color: var(--muted);
-      font-family: var(--mono);
-      font-size: 12px;
+      font-size: 12.5px;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       gap: 10px;
     }
     @media (max-width: 960px) {
-      .dossier-grid { grid-template-columns: 1fr; gap: 28px; }
+      .dossier-grid { grid-template-columns: 1fr; gap: 32px; }
       .vitrine-col { position: relative; top: 0; order: 1; }
       .chapters-col { order: 2; }
-      #stage-3d { height: 340px; min-height: 300px; }
+      #stage-3d { height: 360px; min-height: 300px; }
     }
   </style>
 </head>
@@ -458,7 +460,7 @@
 
   <nav class="topbar" aria-label="SIDIK-ML Navigation">
     <div class="topbar-inner">
-      <a class="brand-mark" href="https://radityobw.github.io/SIDIK-ML/"><span class="brand-diamond"></span>SIDIK-ML / DOSSIER</a>
+      <a class="brand-mark" href="https://radityobw.github.io/SIDIK-ML/"><span class="brand-dot"></span>SIDIK-ML</a>
       <div class="topbar-nav">
         <a href="#sec-architecture">Non-ANN Engine</a>
         <a href="#sec-benchmarks">Benchmarks</a>
@@ -472,23 +474,14 @@
     <div class="dossier-grid">
       <main class="chapters-col">
         <section class="chapter" data-chapter="overview" id="sec-overview">
-          <span class="eyebrow">v0.5.9 | Amber Orange | Non-ANN Only | MIT License</span>
+          <span class="eyebrow">v0.5.9 | Non-ANN Classical ML | MIT License</span>
           <h1>SIDIK-ML: Explainable Non-ANN ML Extension</h1>
           <p class="lead">
             Independent explainable classical machine learning plugin for <strong>SIDIK</strong> combining <strong>5 bundled SHA-256 portable Non-ANN models</strong>, <strong>30 leakage-free static features</strong>, and fail-safe <code>CRITICAL</code> protection over polyglot SAST (30+ languages) and 8-ecosystem offline OSV SCA.
           </p>
-          <div class="pill-row">
-            <span class="pill">5 Bundled SHA-256 Models</span>
-            <span class="pill">Zero Deep Learning / Neural Guard</span>
-            <span class="pill">30 Leakage-Free Features</span>
-            <span class="pill">Polyglot + 8-Ecosystem SCA</span>
-            <span class="pill">1.00 ms Batch Inference</span>
-          </div>
-          <div class="badge-row">
-            <a href="https://pypi.org/project/sidik-ml/"><img src="https://img.shields.io/pypi/v/sidik-ml?label=PyPI&color=f59e0b&cacheSeconds=3600" alt="PyPI Version" /></a>
-            <a href="https://github.com/radityobw/SIDIK-ML/releases/latest"><img src="https://img.shields.io/github/v/release/radityobw/SIDIK-ML?label=Release&color=ea580c&cacheSeconds=3600" alt="GitHub Release" /></a>
-            <a href="https://github.com/radityobw/SIDIK-ML/actions/workflows/sidik-ml-ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/radityobw/SIDIK-ML/sidik-ml-ci.yml?label=CI&color=22c55e" alt="CI Status" /></a>
-          </div>
+          <p class="spec-meta">
+            5 Bundled SHA-256 Models  ·  Zero Deep Learning / Neural Guard  ·  30 Leakage-Free Features  ·  1.00 ms Batch Inference
+          </p>
           <div class="cta-row">
             <a class="btn primary" href="https://github.com/radityobw/SIDIK-ML">GitHub Repository</a>
             <a class="btn" href="https://pypi.org/project/sidik-ml/">PyPI Package</a>
@@ -520,7 +513,7 @@
         </section>
 
         <section class="chapter" data-chapter="benchmarks" id="sec-benchmarks">
-          <h2>5 Bundled Models &amp; Verified CredData Held-Out Results (N = 64)</h2>
+          <h2>5 Bundled Models &amp; CredData Results (N = 64)</h2>
           <table>
             <thead>
               <tr>
@@ -597,7 +590,7 @@
               </tr>
             </tbody>
           </table>
-          <p style="font-size:13.5px; color:var(--muted); margin-top:12px;">
+          <p style="font-size:14px; color:var(--muted); margin-top:14px;">
             External generalization: Across 25 external repositories (1,193 Python files), flags <strong>35.0% (7/20)</strong> deterministic alerts as false positives with <strong>+3.6 ms (+0.15%)</strong> latency overhead. Under zero-shot domain shift on <strong>CredDetX</strong> (1,094 candidates), Hybrid Condition C1 preserves <strong>F1 = 0.7969</strong> and <strong>MCC = +0.2075</strong>.
           </p>
         </section>
@@ -620,17 +613,17 @@ sidik-ml --gui</code></pre>
 
           <div class="core-banner">
             <div>
-              <strong style="color:var(--blue-bright); font-size:16.5px;">Powered by SIDIK Deterministic Core (&gt;=v1.4.0)</strong>
-              <p style="margin:6px 0 0; color:#cbd5e1; font-size:14px;">
+              <strong style="color:var(--text); font-size:17px;">Powered by SIDIK Deterministic Core (&gt;=v1.4.0)</strong>
+              <p style="margin:6px 0 0; color:var(--muted); font-size:14px;">
                 Explore the core scanner architecture, 12 regex rules, 30+ polyglot file extensions, and 19 SCA manifest parsers on the SIDIK documentation page.
               </p>
             </div>
-            <a class="btn" style="border-color:#38bdf8; color:#bae6fd;" href="https://radityobw.github.io/SIDIK/">View SIDIK Core</a>
+            <a class="btn primary" href="https://radityobw.github.io/SIDIK/">View SIDIK Core</a>
           </div>
         </section>
 
         <section class="chapter" data-chapter="releases" id="sec-releases">
-          <h2>Latest Releases (Auto-Synced from CHANGELOG.md)</h2>
+          <h2>Latest Releases</h2>
           <div class="release-grid">
             <!-- AUTO_CHANGELOG_START -->
             <article class="release-card">
@@ -649,26 +642,22 @@ sidik-ml --gui</code></pre>
 
       <aside class="vitrine-col" aria-label="Interactive 3D SIDIK-ML Decision Tree Emblem">
         <div id="stage-3d">
-          <span class="hud-corner tl"></span>
-          <span class="hud-corner tr"></span>
-          <span class="hud-corner bl"></span>
-          <span class="hud-corner br"></span>
           <div class="stage-hud-top">
-            <span id="stage-chapter">01 / OVERVIEW</span>
-            <span>DRAG TO ORBIT</span>
+            <span id="stage-chapter">01 Overview</span>
+            <span>Drag to orbit</span>
           </div>
           <img class="stage-fallback" src="logo.png" alt="SIDIK-ML Logo" width="164" height="164" />
           <canvas id="canvas-3d" aria-label="3D Exploded Explainable Decision Tree Emblem for SIDIK-ML"></canvas>
           <div class="stage-hud-bottom">
-            <span>sidik-ml.glb · 8 MESH LAYERS</span>
-            <span id="stage-explode">ASSEMBLED EMBLEM</span>
+            <span>sidik-ml.glb · 8 layers</span>
+            <span id="stage-explode">Assembled emblem</span>
           </div>
         </div>
       </aside>
     </div>
 
     <footer>
-      <span>SIDIK-ML - Author: Radityo Budi Waskito - MIT License - <!-- AUTO_UPDATED_START -->Updated 2026-11-25<!-- AUTO_UPDATED_END --></span>
+      <span>SIDIK-ML · Author: Radityo Budi Waskito · MIT License · <!-- AUTO_UPDATED_START -->Updated 2026-11-25<!-- AUTO_UPDATED_END --></span>
       <span><a href="https://github.com/radityobw/SIDIK-ML">GitHub</a> | <a href="https://pypi.org/project/sidik-ml/">PyPI</a> | <a href="https://radityobw.github.io/SIDIK/">SIDIK Core</a></span>
     </footer>
   </div>
