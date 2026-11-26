@@ -284,7 +284,20 @@ def _render_report_text(report, fmt: str, lang: str, use_color: Optional[bool] =
     return ReportFormatter.to_console_summary(report, lang=lang, use_color=use_color)
 
 
+def _register_brand_assets_env() -> None:
+    """Exposes packaged or repo SIDIK-ML branding assets via SIDIK's decoupled env hook."""
+    if os.environ.get("SIDIK_BRAND_ASSETS_DIR"):
+        return
+    pkg_assets = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+    repo_logo = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logo")
+    for candidate in (pkg_assets, repo_logo):
+        if os.path.isdir(candidate):
+            os.environ["SIDIK_BRAND_ASSETS_DIR"] = candidate
+            return
+
+
 def main(argv: Optional[List[str]] = None) -> int:
+    _register_brand_assets_env()
     raw_argv = list(sys.argv[1:]) if argv is None else list(argv)
     if not raw_argv and argv is None and sys.stdin.isatty() and sys.stdout.isatty():
         raw_argv = ["interactive"]

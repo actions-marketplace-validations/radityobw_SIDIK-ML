@@ -1,6 +1,10 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/radityobw/SIDIK/main/logo/SIDIK-nobg-dark.png" alt="SIDIK-ML Logo" width="300"/>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/radityobw/SIDIK-ML/main/logo/sidik-ml-white-nobg.png" />
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/radityobw/SIDIK-ML/main/logo/sidik-ml-dark-nobg.png" />
+  <img src="https://raw.githubusercontent.com/radityobw/SIDIK-ML/main/logo/sidik-ml-dark-nobg.png" alt="SIDIK-ML Logo" width="320"/>
+</picture>
 
 # SIDIK-ML: *Explainable Non-Neural ML Extension*
 
